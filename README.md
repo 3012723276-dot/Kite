@@ -10,7 +10,7 @@
 
 # Kite
 
-**雲の音 — Native macOS client for NetEase Cloud Music**
+**Kite — Native macOS client for NetEase Cloud Music**
 
 Built with SwiftUI · Talks directly to NetEase's real API · Sparkle auto-updates
 
