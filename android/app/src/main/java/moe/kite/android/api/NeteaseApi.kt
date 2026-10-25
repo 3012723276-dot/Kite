@@ -223,6 +223,58 @@ class NeteaseApi(
         return parsePlaylists(list)
     }
 
+    // MARK: - 登录：扫码（与 iOS LoginSheet 同流程）
+    data class QrCheckResult(val code: Int, val nickname: String?, val message: String?)
+
+    /** 取扫码 key：/login/qrcode/unikey，type=1 */
+    fun qrKey(): String {
+        val raw = weapi("/weapi/login/qrcode/unikey", """{"type":1}""")
+        return json.parseToJsonElement(raw).jsonObject["unikey"]?.jsonPrimitive?.contentOrNull ?: ""
+    }
+
+    fun qrLoginUrl(unikey: String): String {
+        return "https://music.163.com/login?codekey=$unikey"
+    }
+
+    /**
+     * 轮询扫码状态：800 已过期 · 801 等待扫码 · 802 已扫码待确认 · 803 成功。
+     * 803 时服务器通过 Set-Cookie 返回 MUSIC_U，OkHttp 的 CookieJar
+     * （必须用 withCookieJar 创建的 Api 实例）会自动存下来，之后请求就带登录态。
+     */
+    fun qrCheck(unikey: String): QrCheckResult {
+        val raw = weapi("/weapi/login/qrcode/client/login", """{"key":"$unikey","type":1}""")
+        val obj = json.parseToJsonElement(raw).jsonObject
+        return QrCheckResult(
+            code = obj["code"]?.jsonPrimitive?.longOrNull?.toInt() ?: -1,
+            nickname = obj["nickname"]?.jsonPrimitive?.contentOrNull,
+            message = obj["message"]?.jsonPrimitive?.contentOrNull
+        )
+    }
+
+    /** 登录后取账号昵称：/w/nuser/account/get */
+    fun userNickname(): String? {
+        return try {
+            val raw = weapi("/weapi/w/nuser/account/get", """{}""")
+            json.parseToJsonElement(raw).jsonObject["profile"]
+                ?.jsonObject?.get("nickname")?.jsonPrimitive?.contentOrNull
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** 短信登录（带服务器返回信息，便于 UI 显示真实原因，不再只说“检查验证码”） */
+    fun loginCellphoneDetailed(phone: String, captcha: String, countryCode: String = "86"): Pair<Boolean, String> {
+        val raw = weapi(
+            "/weapi/w/login/cellphone",
+            """{"type":"1","https":"true","phone":"$phone","countrycode":"$countryCode","captcha":"$captcha","remember":"true","secureCaptcha":""}"""
+        )
+        val obj = json.parseToJsonElement(raw).jsonObject
+        val code = obj["code"]?.jsonPrimitive?.longOrNull ?: -1L
+        val msg = obj["message"]?.jsonPrimitive?.contentOrNull
+            ?: obj["msg"]?.jsonPrimitive?.contentOrNull ?: ""
+        return if (code == 200L) true to "登录成功" else false to (msg.ifBlank { "登录失败（服务器返回 code=$code）" })
+    }
+
     /** 歌词：先 /song/lyric/v1，拿不到再 /song/lyric，与 iOS 版同策略 */
     fun lyric(id: Long): String {
         val rawV1 = weapi(
