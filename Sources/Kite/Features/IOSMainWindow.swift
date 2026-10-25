@@ -677,20 +677,40 @@ struct IOSLibraryView: View {
                     if let liked = account.likedSongsPlaylist {
                         NavigationLink(value: Destination.playlist(liked.id)) {
                             Label("我喜欢的音乐", systemImage: "heart.fill")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(Theme.accent)
                         }
                     }
                     NavigationLink(value: Destination.daily) {
-                        Label("每日推荐", systemImage: "calendar")
+                        Label {
+                            Text("每日推荐")
+                        } icon: {
+                            Image(systemName: "calendar")
+                                .foregroundStyle(.white)
+                        }
                     }
                     NavigationLink(value: Destination.recents) {
-                        Label("最近播放", systemImage: "clock.fill")
+                        Label {
+                            Text("最近播放")
+                        } icon: {
+                            Image(systemName: "clock.fill")
+                                .foregroundStyle(.white)
+                        }
                     }
                     NavigationLink(value: Destination.collections) {
-                        Label("我的收藏", systemImage: "star.fill")
+                        Label {
+                            Text("我的收藏")
+                        } icon: {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.white)
+                        }
                     }
                     NavigationLink(value: Destination.cloud) {
-                        Label("音乐云盘", systemImage: "icloud.fill")
+                        Label {
+                            Text("音乐云盘")
+                        } icon: {
+                            Image(systemName: "icloud.fill")
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
 
