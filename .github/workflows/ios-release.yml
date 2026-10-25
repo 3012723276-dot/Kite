@@ -1,0 +1,83 @@
+name: iOS IPA Release
+
+# Only builds and publishes the iOS IPA. No macOS build, no signing,
+# no notarization, no Sparkle, no Homebrew — so it needs no secrets.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.3.22 (without the leading v)"
+        required: true
+        default: "0.3.22"
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  ios:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: build number = commit count
+
+      - name: Derive version
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+          echo "Releasing iOS $VERSION (build $(git rev-list --count HEAD))"
+
+      - name: Release notes
+        run: |
+          # Use the CHANGELOG section when it exists; otherwise fall back to
+          # a short note so the release (and altstore.json, which requires
+          # non-empty notes) never fails just because CHANGELOG wasn't updated.
+          if Scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md" 2>/dev/null; then
+            echo "Using CHANGELOG section for $VERSION"
+          else
+            printf 'Kite iOS %s\n\nUnsigned IPA for iOS 16+. Install with AltStore, SideStore, Sideloadly or Xcode using your own Apple ID.\n' "$VERSION" > "$RUNNER_TEMP/notes.md"
+          fi
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Build unsigned iOS app
+        run: |
+          xcodebuild -workspace ios/KiteIOS.xcworkspace -scheme KiteIOS \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/ios-dd" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p dist "$RUNNER_TEMP/payload/Payload"
+          cp -R "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app" \
+            "$RUNNER_TEMP/payload/Payload/"
+          (cd "$RUNNER_TEMP/payload" && zip -qry "$GITHUB_WORKSPACE/dist/Kite-iOS-$VERSION.ipa" Payload)
+          ls -lh dist/
+
+      - name: Generate AltStore source
+        env:
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+        run: |
+          bash Scripts/altstore-source.sh "$VERSION" \
+            "dist/Kite-iOS-$VERSION.ipa" "$RUNNER_TEMP/notes.md" \
+            > dist/altstore.json
+          cat dist/altstore.json
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" \
+            --title "Kite iOS $VERSION" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            "dist/Kite-iOS-$VERSION.ipa" \
+            dist/altstore.json
