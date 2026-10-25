@@ -220,6 +220,9 @@ struct SettingsView: View {
                 // plain-style buttons so they render in the same primary /
                 // secondary colors as the WeChat row below, instead of the
                 // app's red accent color that a default Button would use.
+                // Every row also has a long-press menu that copies the
+                // contact value on the right; tapping the first three rows
+                // still opens their link / mail app.
                 Button {
                     if let url = URL(string: "https://t.me/Kite_090127") {
                         openURL(url)
@@ -233,6 +236,11 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .contextMenu {
+                    Button("复制") {
+                        Platform.copyToPasteboard(string: "t.me/Kite_090127")
+                    }
+                }
                 Button {
                     if let url = URL(string: "https://x.com/kite_090127?s=11") {
                         openURL(url)
@@ -246,6 +254,11 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .contextMenu {
+                    Button("复制") {
+                        Platform.copyToPasteboard(string: "x.com/kite_090127")
+                    }
+                }
                 Button {
                     if let url = URL(string: "mailto:3012723276@qq.com") {
                         openURL(url)
@@ -259,11 +272,21 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .contextMenu {
+                    Button("复制") {
+                        Platform.copyToPasteboard(string: "3012723276@qq.com")
+                    }
+                }
                 HStack {
                     Text("WeChat")
                     Spacer()
                     Text("Kite_090127")
                         .foregroundStyle(.secondary)
+                }
+                .contextMenu {
+                    Button("复制") {
+                        Platform.copyToPasteboard(string: "Kite_090127")
+                    }
                 }
             }
         }
