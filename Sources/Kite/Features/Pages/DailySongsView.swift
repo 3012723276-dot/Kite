@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DailySongsView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @State private var tracks: [Track] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -41,7 +42,7 @@ struct DailySongsView: View {
         } footer: {
             PlayerClearanceSpacer()
         }
-        .navigationTitle("每日推荐")
+        .navigationTitle(AppLanguageBundle.localizedString("每日推荐"))
         .task {
             if tracks.isEmpty {
                 await load()
@@ -106,7 +107,7 @@ struct DailySongsView: View {
     private func load() async {
         guard account.isLoggedIn else {
             isLoading = false
-            errorMessage = String(localized: "登录后才能查看每日推荐")
+            errorMessage = AppLanguageBundle.localizedString("登录后才能查看每日推荐")
             return
         }
         isLoading = true
