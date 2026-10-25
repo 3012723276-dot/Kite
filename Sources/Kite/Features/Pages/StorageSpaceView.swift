@@ -70,6 +70,7 @@ struct StorageSpaceView: View {
                 }
                 #else
                 Toggle("歌曲缓存", isOn: $settings.enableAudioCache)
+                    .tint(.green)
                 if settings.enableAudioCache {
                     Picker("上限", selection: cacheLimitSelection) {
                         if let automaticLimitMB {
