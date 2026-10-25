@@ -216,47 +216,50 @@ struct SettingsView: View {
             }
 
             Section("联系我们") {
+                // No leading icons in this section. The three link rows are
+                // plain-style buttons so they render in the same primary /
+                // secondary colors as the WeChat row below, instead of the
+                // app's red accent color that a default Button would use.
                 Button {
                     if let url = URL(string: "https://t.me/Kite_090127") {
                         openURL(url)
                     }
                 } label: {
                     HStack {
-                        ContactIcon.telegram
                         Text("Telegram")
                         Spacer()
                         Text("t.me/Kite_090127")
                             .foregroundStyle(.secondary)
                     }
                 }
+                .buttonStyle(.plain)
                 Button {
                     if let url = URL(string: "https://x.com/kite_090127?s=11") {
                         openURL(url)
                     }
                 } label: {
                     HStack {
-                        ContactIcon.twitter
                         Text("Twitter")
                         Spacer()
                         Text("x.com/kite_090127")
                             .foregroundStyle(.secondary)
                     }
                 }
+                .buttonStyle(.plain)
                 Button {
                     if let url = URL(string: "mailto:3012723276@qq.com") {
                         openURL(url)
                     }
                 } label: {
                     HStack {
-                        ContactIcon.email
                         Text("Email")
                         Spacer()
                         Text("3012723276@qq.com")
                             .foregroundStyle(.secondary)
                     }
                 }
+                .buttonStyle(.plain)
                 HStack {
-                    ContactIcon.wechat
                     Text("WeChat")
                     Spacer()
                     Text("Kite_090127")
@@ -300,56 +303,6 @@ struct SettingsView: View {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
     }
 
-}
-
-/// Contact icons for the "联系我们" section, drawn at the same size as
-/// the other Settings rows' SF Symbol icons (about 22 pt). All four are
-/// monochrome, like the surrounding rows; Telegram is just its paper
-/// plane shape, with no blue circle behind it.
-private enum ContactIcon {
-    static var telegram: some View {
-        TelegramPaperPlane()
-            .fill(Color.primary)
-            .padding(2)
-            .frame(width: 22, height: 22)
-    }
-
-    static var twitter: some View {
-        ZStack {
-            Capsule()
-                .frame(width: 18, height: 2.5)
-                .rotationEffect(.degrees(45))
-            Capsule()
-                .frame(width: 18, height: 2.5)
-                .rotationEffect(.degrees(-45))
-        }
-        .frame(width: 22, height: 22)
-    }
-
-    static var email: some View {
-        Image(systemName: "envelope")
-            .frame(width: 22, height: 22)
-    }
-
-    static var wechat: some View {
-        Image(systemName: "bubble.left.and.bubble.right")
-            .frame(width: 22, height: 22)
-    }
-}
-
-private struct TelegramPaperPlane: Shape {
-    func path(in rect: CGRect) -> Path {
-        let width = rect.width
-        let height = rect.height
-        var path = Path()
-        path.move(to: CGPoint(x: width * 0.08, y: height * 0.52))
-        path.addLine(to: CGPoint(x: width * 0.95, y: height * 0.05))
-        path.addLine(to: CGPoint(x: width * 0.72, y: height * 0.92))
-        path.addLine(to: CGPoint(x: width * 0.58, y: height * 0.62))
-        path.addLine(to: CGPoint(x: width * 0.38, y: height * 0.82))
-        path.closeSubpath()
-        return path
-    }
 }
 
 #if os(macOS)
