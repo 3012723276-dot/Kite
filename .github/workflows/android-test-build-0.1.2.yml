@@ -1,0 +1,96 @@
+name: Android Test APK Build
+
+# 测试用：只构建多架构 Debug APK 并上传为 workflow 产物，不建 Release、不打 tag。
+# 注意：内部版本号写死为 10，必须高于已发布 0.1.0 的内部版本号 9，否则覆盖安装会被判为降级而失败。
+# 不要用 github.run_number（新 workflow 第一次跑是 1，会低于 9）。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Android test version, e.g. 0.1.2 (without android-v prefix)"
+        required: true
+        default: "0.1.2"
+
+permissions:
+  contents: read
+
+jobs:
+  android-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: 15859902
+          accept-android-sdk-licenses: false
+          packages: ""
+
+      - name: Install Android SDK packages and NDK
+        run: bash android/scripts/ci/install-android-sdk.sh
+
+      - name: Setup Gradle 9.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Setup Android Rust targets
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo +stable install cargo-ndk --version 4.1.2 --locked
+
+      - name: Test shared Rust core
+        working-directory: android
+        run: cargo test -p kumone-core -p kumone-ffi --all-targets
+
+      - name: Generate Kotlin UniFFI bindings
+        working-directory: android
+        run: |
+          rm -rf app/build/generated/uniffi/kotlin
+          mkdir -p app/build/generated/uniffi/kotlin
+          cargo build -p kumone-ffi --release
+          cargo run -p uniffi-bindgen -- generate \
+            --library target/release/libkumone_ffi.so \
+            --language kotlin \
+            --out-dir app/build/generated/uniffi/kotlin \
+            --no-format
+
+      - name: Build Rust library for all ABIs
+        working-directory: android
+        run: |
+          rm -rf app/build/generated/uniffi/jniLibs
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86 -t x86_64 \
+            -o app/build/generated/uniffi/jniLibs \
+            build -p kumone-ffi --release
+          test -f app/build/generated/uniffi/jniLibs/arm64-v8a/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/armeabi-v7a/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/x86/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/x86_64/libkumone_ffi.so
+
+      - name: Build Debug APK
+        run: |
+          gradle -p android :app:assembleDebug \
+            -PkumoneVersion="${{ inputs.version }}" \
+            -PkumoneVersionCode="10"
+
+      - name: Verify APK contains FFI lib for all ABIs
+        run: |
+          APK=$(find android/app/build/outputs/apk/debug -name '*.apk' -type f -print -quit)
+          test -n "$APK"
+          ls -lh "$APK"
+          unzip -l "$APK" | grep libkumone_ffi.so
+          test "$(unzip -l "$APK" | grep -c libkumone_ffi.so)" -eq 4
+
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-apk
+          path: android/app/build/outputs/apk/debug/*.apk
