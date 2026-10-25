@@ -2,18 +2,14 @@ import Foundation
 
 enum AudioSourceID: String, CaseIterable, Hashable {
     case pyncmd
-    case bilibili
     case kugou
     case kuwo
-    case bodian
 
     var displayName: String {
         switch self {
         case .pyncmd: return "pyncmd"
-        case .bilibili: return String(localized: "B站音乐")
         case .kugou: return String(localized: "酷狗音乐")
         case .kuwo: return String(localized: "酷我音乐")
-        case .bodian: return String(localized: "波点音乐")
         }
     }
 }
