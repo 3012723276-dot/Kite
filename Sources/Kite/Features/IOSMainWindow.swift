@@ -573,7 +573,7 @@ struct IOSMiniPlayerBar: View {
     }
 
     private var nowPlayingAccessibilityLabel: String {
-        let title = player.currentTrack?.name ?? String(localized: "正在播放")
+        let title = player.currentTrack?.name ?? AppLanguageBundle.localizedString("正在播放")
         guard let artist = player.currentTrack?.artistNames, !artist.isEmpty else {
             return title
         }
@@ -605,6 +605,7 @@ struct IOSMiniPlayerBar: View {
 // MARK: - iOS Library View
 
 struct IOSLibraryView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @Binding var showLogin: Bool
     @EnvironmentObject private var account: AccountStore
     @State private var showSettings = false
@@ -754,7 +755,7 @@ struct IOSLibraryView: View {
                     .listRowBackground(Color.clear)
             }
         }
-        .navigationTitle("我的")
+        .navigationTitle(AppLanguageBundle.localizedString("我的"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -769,7 +770,7 @@ struct IOSLibraryView: View {
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView()
-                    .navigationTitle("设置")
+                    .navigationTitle(AppLanguageBundle.localizedString("设置"))
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("完成") {
@@ -794,7 +795,7 @@ struct IOSLibraryView: View {
                     do {
                         try await NeteaseAPI.createPlaylist(name: name, isPrivate: false)
                         await account.refreshLibrary()
-                        ToastCenter.shared.show(String(localized: "歌单已创建"))
+                        ToastCenter.shared.show(AppLanguageBundle.localizedString("歌单已创建"))
                     } catch {
                         ToastCenter.shared.show(error.localizedDescription)
                     }
