@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Base entitlements - add your app's entitlements here -->
+	<!-- AI agents can safely modify this file to add capabilities -->
+	
+	<!-- Example entitlements (commented out by default):
+	
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
+	
+	<key>com.apple.developer.contacts.notes</key>
+	<true/>
+	
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
+	
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.mycompany.KiteIOS</string>
+	</array>
+	
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.mycompany.KiteIOS</string>
+	</array>
+    
+	-->
+
+	<!--
+		CarPlay 音频能力需要 Apple 单独授权（提交 CarPlay 申请），未授权时真机编译会报：
+		"Entitlement com.apple.developer.carplay-audio not found and could not be included in profile"。
+		默认保持注释；如需启用 CarPlay：
+		1. 在 Apple Developer 后台为你的 App ID 开通 CarPlay (Audio) 能力
+		2. 取消下面这段注释并重新签名
+		3. 同时把 ios/Config/Info.plist 里的 CarPlay 相关键保持开启
+	-->
+	<!--
+	<key>com.apple.developer.carplay-audio</key>
+	<true/>
+	-->
+</dict>
+</plist>
