@@ -1,0 +1,57 @@
+# XcodeGen manifest for the iOS app shell.
+# Regenerate the project with: cd ios && xcodegen generate
+name: KiteIOS
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+packages:
+  KiteIOSPackage:
+    path: KiteIOSPackage
+targets:
+  KiteIOS:
+    type: application
+    platform: iOS
+    sources:
+      - KiteIOS
+      - path: ../Sources/Kite/Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    configFiles:
+      Debug: Config/Debug.xcconfig
+      Release: Config/Release.xcconfig
+    dependencies:
+      - package: KiteIOSPackage
+        product: KiteIOSFeature
+    settings:
+      base:
+        # CODE_SIGN_ENTITLEMENTS is deliberately NOT set here. Target-level build
+        # settings override xcconfig, which would pin the entitlements file and
+        # silently defeat the CarPlay overlay in Config/Shared.xcconfig. The
+        # setting lives there instead, behind $(KITE_ENTITLEMENTS_FILE).
+        ENABLE_PREVIEWS: YES
+  KiteIOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - KiteIOSUITests
+    configFiles:
+      Debug: Config/Tests.xcconfig
+      Release: Config/Tests.xcconfig
+    dependencies:
+      - target: KiteIOS
+schemes:
+  KiteIOS:
+    build:
+      targets:
+        KiteIOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - KiteIOSUITests
+    archive:
+      config: Release
