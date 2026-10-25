@@ -68,6 +68,7 @@ fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
                     ListItem(
                         headlineContent = { Text(currentTrack!!.name) },
                         supportingContent = { Text(currentTrack!!.artist) },
+                        modifier = Modifier.clickable { navController.navigate("player") },
                         trailingContent = {
                             TextButton(onClick = {
                                 player.togglePlayPause()
@@ -98,22 +99,54 @@ fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
             startDestination = "home",
             modifier = Modifier.padding(padding)
         ) {
-            composable("home") { HomeScreen(api = api) }
+            composable("home") {
+                HomeScreen(
+                    api = api,
+                    onPlaylistClick = { id -> navController.navigate("playlist/$id") }
+                )
+            }
             composable("search") { SearchScreen(api = api, onPlay = ::playTrack) }
             composable("login") { LoginScreen(api = api) }
+            composable("player") {
+                PlayerScreen(
+                    api = api,
+                    player = player,
+                    onNext = {
+                        val next = player.nextTrack()
+                        if (next != null) playTrack(next)
+                    },
+                    onPrev = {
+                        val prev = player.prevTrack()
+                        if (prev != null) playTrack(prev)
+                    }
+                )
+            }
+            composable("playlist/{id}") { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")?.toLongOrNull() ?: 0L
+                PlaylistDetailScreen(
+                    api = api,
+                    playlistId = id,
+                    onPlayQueue = { tracks, index ->
+                        player.playQueue(tracks, index) { track -> "" }
+                        playTrack(tracks[index])
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun HomeScreen(api: NeteaseApi) {
+fun HomeScreen(api: NeteaseApi, onPlaylistClick: (Long) -> Unit) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
+    var playlists by remember { mutableStateOf<List<moe.kite.android.model.Playlist>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         try {
             albums = withContext(Dispatchers.IO) { api.newAlbums() }
+            playlists = withContext(Dispatchers.IO) { api.personalizedPlaylists() }
         } catch (e: Exception) {
             error = e.message ?: "加载失败"
         } finally {
@@ -122,13 +155,27 @@ fun HomeScreen(api: NeteaseApi) {
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("新专辑", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(12.dp))
-        when {
-            loading -> CircularProgressIndicator()
-            error != null -> Text("加载失败：$error")
-            albums.isEmpty() -> Text("暂无数据，先检查网络与密钥配置。")
-            else -> LazyColumn {
+        Text("推荐歌单", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyColumn {
+            items(playlists) { playlist ->
+                ListItem(
+                    headlineContent = { Text(playlist.name) },
+                    supportingContent = { Text("${playlist.trackCount} 首") },
+                    modifier = Modifier.clickable { onPlaylistClick(playlist.id) }
+                )
+                HorizontalDivider()
+            }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("新专辑", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            if (loading) {
+                item { CircularProgressIndicator() }
+            } else if (error != null) {
+                item { Text("加载失败：$error") }
+            } else {
                 items(albums) { album ->
                     ListItem(
                         headlineContent = { Text(album.name) },
