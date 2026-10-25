@@ -1,0 +1,43 @@
+@startuml periodic-refresh
+!pragma layout smetana
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Periodic Refresh Task: Maintained at Activity Boundaries
+
+state "No periodic task\nperiodicRefreshTask = nil" as Stopped
+state "The connection's single periodic task" as Active {
+  state "Wait 20 s\nweak reference to the service" as Sleeping
+  state "Check liveness, cancellation, connection" as Check
+  state "await synchronizeNow()\nreuses the shared execution task" as Syncing
+  [*] --> Sleeping
+  Sleeping --> Check : wait finished
+  Check --> Syncing : enabled && connected\nsame connectionID and not cancelled
+  Syncing --> Sleeping : same connection and next round not cancelled
+}
+
+[*] --> Stopped
+Stopped --> Active : updatePeriodicRefreshTask(isPlaying:)\n[enabled && connected && (foreground || isPlaying)]
+Active --> Stopped : condition no longer holds → cancel + nil
+Active --> Stopped : disable / replaced connection / folder lost / deinit
+Check --> Stopped : cancelled / service released / stale connection
+Syncing --> Stopped : connection replaced or task cancelled while waiting
+
+note right of Stopped
+  Maintained from:
+  · activateConnection: after activation, before the first sync
+  · setForeground: maintain first, then sync immediately
+  · $isPlaying.removeDuplicates: uses the event value
+
+  Paused in the foreground: periodic refresh still needed.
+  Playing in the background: periodic refresh still needed.
+  Paused in the background: periodic refresh stops.
+  Condition still holds and a task exists: kept, not re-created.
+end note
+note right of Active
+  Each round is the 20 s wait plus this round's sync time.
+  It does not start a concurrent transaction every 20 s.
+  Stopping the periodic task does not cancel a shared sync already running.
+  An old connection's task waking late cannot act on a new connection.
+  No schedule is guaranteed while iOS suspends the app.
+end note
+@enduml
