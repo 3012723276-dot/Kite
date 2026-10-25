@@ -544,16 +544,9 @@
 
 ## 0.1.6 - 2026-10-25
 ### Added / 新增
-- Traditional Chinese localization; the app follows the system language
-- Settings now has a Contact Us section; long-press any contact value to copy it
-- 繁体中文界面，App 跟随系统语言
-- 设置新增"联系我们"一栏，长按任意联系方式可复制
-### Fixed / 修复
-- Contact Us email address now matches the other rows (no longer red)
-- In-app update check now points to this repository (3012723276-dot/Kite) instead of the upstream repo
-- 设置页联系方式里的邮箱不再显示红色，与其他行一致
-- 应用内检查更新改为查本仓库，不再查上游仓库
-
+- Added Traditional Chinese localization
+- 新增繁体中文界面
+  
 ## 0.1.5 - 2026-08-16
 
 ### Added / 新增
