@@ -16,15 +16,13 @@ enum NeteaseCrypto {
     // DO NOT CHANGE LENGTH OR KEY WITHOUT RECOMPUTING encSecKey: this key
     // must stay exactly 16 bytes for AES-128, and weapiEncSecKey below is
     // the raw-RSA encryption (reverse the key, pow with exponent 65537 and
-    // the NetEase modulus) of this exact key. The 0.1.1 restore used a
-    // capital-K variant that would not match the server's decrypted key,
-    // so this Kite key and its matching encSecKey replace it.
-    private static let weapiSecretKey = "Kite2026abcDEF16"
+    // the NetEase modulus) of this exact key.
+    private static let weapiSecretKey = "Kite200901272026"
     private static let weapiEncSecKey =
-        "0be90bcb937777b506976d2f0c3740e31dd392ff43e52a409594e07b10588b92" +
-        "c26ff4a429d4a1f782061afc42028f807e63396baf78735b443e5c5291f8e35e" +
-        "ca26efb138072431ee4304c2c2a299891230e2ce39c346169a5ebf797f6b9d45" +
-        "4b05abfd63b221236b43907458c0dcffb64faec1220e6ce2b8ab3361c4a4f055"
+        "5fea198f30ecdd9e142c8c8a8cd4363b9e5fc21a56145b1514ec03df16af22fb" +
+        "951f691d65d225c9ea6502fd8c0352956aa9d99bda184424096c74991448b981" +
+        "0ced9d16a27d9f14fb799a3c03326dad50ad7f6644beb932e23dcfb16ceb5821" +
+        "05487a24ab4869336d090685cd27660e208bbeb31a197a37561f40e7adc332ca"
     private static let eapiKey = "e82ckenh8dichen8"
 
     /// Encrypts a JSON payload for a `/weapi/...` endpoint.
