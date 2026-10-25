@@ -187,5 +187,3 @@ Licensed under [LGPL-3.0-only](LICENSE) (the [GPL-3.0](COPYING) text is
 included alongside). For learning and personal use only — all music data and
 rights belong to NetEase Cloud Music and the respective source platforms. No
 downloading, no social features.
-
-> **Attribution:** This project is a rebranded modification of [Kumone](https://github.com/missuo/kumone) by missuo, licensed under LGPL-3.0. The original LICENSE and COPYING files are preserved unchanged.
