@@ -197,7 +197,7 @@ struct FMView: View {
                 .foregroundStyle(.secondary)
             Button("登录") { openLogin() }
                 .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
+                .tint(.blue)
         }
     }
 }
