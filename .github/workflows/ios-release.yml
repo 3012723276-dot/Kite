@@ -86,4 +86,7 @@ jobs:
             --title "Kite iOS $VERSION" \
             --notes-file "$RUNNER_TEMP/notes.md" \
             "dist/Kite-iOS-$VERSION.ipa" \
+            dist/altstore.json \
+          || gh release upload "v$VERSION" \
+            "dist/Kite-iOS-$VERSION.ipa" \
             dist/altstore.json
