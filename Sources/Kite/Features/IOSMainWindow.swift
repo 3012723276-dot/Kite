@@ -653,7 +653,7 @@ struct IOSLibraryView: View {
                                     .foregroundStyle(.white)
                                 Text("同步我喜欢的音乐、歌单与每日推荐")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.white)
                             }
                         }
                         .padding(.vertical, 6)
