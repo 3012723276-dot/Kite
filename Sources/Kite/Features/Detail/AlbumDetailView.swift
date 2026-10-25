@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AlbumDetailView: View {
+    @EnvironmentObject private var settings: SettingsManager
     let albumID: Int
 
     @State private var album: AlbumDetail?
@@ -98,7 +99,7 @@ struct AlbumDetailView: View {
             }
         }
         #if os(macOS)
-        .navigationTitle(album?.name ?? String(localized: "专辑"))
+        .navigationTitle(album?.name ?? AppLanguageBundle.localizedString("专辑"))
         #else
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -184,7 +185,7 @@ struct AlbumDetailView: View {
                                 .font(.system(size: 14))
                                 .padding(20)
                         }
-                        .navigationTitle("专辑简介")
+                        .navigationTitle(AppLanguageBundle.localizedString("专辑简介"))
                         #if os(iOS)
                         .navigationBarTitleDisplayMode(.inline)
                         #endif
@@ -244,7 +245,7 @@ struct AlbumDetailView: View {
                 .shadow(color: .black.opacity(0.25), radius: 16, y: 8)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(album.subType?.isEmpty == false ? album.subType! : String(localized: "专辑"))
+                Text(album.subType?.isEmpty == false ? album.subType! : AppLanguageBundle.localizedString("专辑"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
@@ -310,7 +311,7 @@ struct AlbumDetailView: View {
                         Button {
                             toggleSubscribe()
                         } label: {
-                            Label(isSubscribed ? String(localized: "已收藏") : String(localized: "收藏"),
+                            Label(isSubscribed ? AppLanguageBundle.localizedString("已收藏") : AppLanguageBundle.localizedString("收藏"),
                                   systemImage: isSubscribed ? "checkmark" : "plus")
                                 .font(.system(size: 13, weight: .medium))
                                 .padding(.horizontal, 14)
@@ -336,7 +337,7 @@ struct AlbumDetailView: View {
             do {
                 try await NeteaseAPI.subscribeAlbum(id: albumID, subscribe: !isSubscribed)
                 isSubscribed.toggle()
-                ToastCenter.shared.show(isSubscribed ? String(localized: "已收藏专辑") : String(localized: "已取消收藏"))
+                ToastCenter.shared.show(isSubscribed ? AppLanguageBundle.localizedString("已收藏专辑") : AppLanguageBundle.localizedString("已取消收藏"))
             } catch {
                 ToastCenter.shared.show(error.localizedDescription)
             }
