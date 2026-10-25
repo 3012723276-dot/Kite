@@ -285,14 +285,14 @@ struct SettingsView: View {
                     }
                 }
                 Button {
-                    if let url = URL(string: "mailto:3012723276@qq.com") {
+                    if let url = URL(string: "mailto:zzh301272376@gmail.com") {
                         openURL(url)
                     }
                 } label: {
                     HStack {
                         Text("Email")
                         Spacer()
-                        Text("3012723276@qq.com")
+                        Text("zzh301272376@gmail.com")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -305,7 +305,7 @@ struct SettingsView: View {
                 .tint(.secondary)
                 .contextMenu {
                     Button("复制") {
-                        Platform.copyToPasteboard(string: "3012723276@qq.com")
+                        Platform.copyToPasteboard(string: "zzh301272376@gmail.com")
                     }
                 }
             }
