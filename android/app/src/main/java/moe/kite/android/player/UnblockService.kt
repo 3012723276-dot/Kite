@@ -28,9 +28,12 @@ object UnblockService {
     data class ResolvedSource(val name: String, val url: String)
 
     fun resolve(track: Track): ResolvedSource? {
-        return try { pyncmd(track) }
-            ?: try { kugou(track) } catch (e: Exception) { null }
-            ?: try { kuwo(track) } catch (e: Exception) { null }
+        // Kotlin 里 try 当表达式用必须带 catch/finally，
+        // 原来第一个 try 没带 catch 就是 #5 的语法错误，改成显式三段 try-catch。
+        try { pyncmd(track)?.let { return it } } catch (e: Exception) { /* try next source */ }
+        try { kugou(track)?.let { return it } } catch (e: Exception) { /* try next source */ }
+        try { kuwo(track)?.let { return it } } catch (e: Exception) { /* no source left */ }
+        return null
     }
 
     private fun get(url: String, userAgent: String? = null): String {

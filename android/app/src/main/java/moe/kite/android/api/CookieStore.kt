@@ -44,7 +44,10 @@ class PersistentCookieJar(context: Context) : CookieJar {
     }
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        return memory[url.host]?.filter { !it.hasExpired } ?: emptyList()
+        // OkHttp 的 Cookie 没有 hasExpired，只有 expiresAt 时间戳，
+        // 过期判断要自己用当前时间比，这就是 #5 编译失败的原因之一。
+        val now = System.currentTimeMillis()
+        return memory[url.host]?.filter { it.expiresAt >= now } ?: emptyList()
     }
 
     fun clear() {
