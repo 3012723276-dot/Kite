@@ -262,6 +262,7 @@
 "VIP 歌曲，当前为试听片段" = "VIP song — playing a trial clip";
 "酷我音乐" = "Kuwo Music";
 "酷狗音乐" = "Kugou Music";
+"因版权问题，部分歌曲目前暂不支持播放，建议从云端导入" = "Due to copyright issues, some songs are currently unavailable. We recommend importing them from the cloud.";
 
 /* Track playability */
 "VIP 专属" = "VIP Only";
