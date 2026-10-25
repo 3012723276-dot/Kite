@@ -1,0 +1,52 @@
+name: iOS Test IPA Build
+
+# TEMPORARY test-only workflow on test/beta3.
+# It builds an unsigned IPA and uploads it as a workflow artifact.
+# It deliberately does NOT create a GitHub release, tag, or touch main.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Test version, e.g. 0.1.5 (without the leading v)"
+        required: true
+        default: "0.1.5"
+
+permissions:
+  contents: read
+
+jobs:
+  ios-test:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive version
+        run: |
+          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+
+      - name: Build unsigned iOS app
+        run: |
+          xcodebuild -workspace ios/KiteIOS.xcworkspace -scheme KiteIOS \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/ios-dd" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p dist "$RUNNER_TEMP/payload/Payload"
+          cp -R "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app" \
+            "$RUNNER_TEMP/payload/Payload/"
+          (cd "$RUNNER_TEMP/payload" && zip -qry "$GITHUB_WORKSPACE/dist/Kite-iOS-$VERSION-test.ipa" Payload)
+          ls -lh dist/
+
+      - name: Upload test IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kite-ios-test-ipa
+          path: dist/Kite-iOS-*.ipa
+          if-no-files-found: error
