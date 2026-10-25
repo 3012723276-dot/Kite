@@ -45,6 +45,10 @@ public struct IOSMainWindow: View {
             .environmentObject(toasts)
             .environmentObject(artworkStore)
             .tint(Theme.accent)
+            // In-app language (beta2): drives SwiftUI localized-string
+            // lookup and date/number formatting; the Bundle redirect in
+            // SettingsManager covers String(localized:) code paths.
+            .environment(\.locale, Locale(identifier: settings.effectiveAppLanguage.rawValue))
             .preferredColorScheme(settings.appearance.colorScheme)
             .environment(\.openLogin, { showLogin = true })
             .environment(\.openDestination, openDestination)
@@ -767,6 +771,11 @@ struct IOSLibraryView: View {
                         }
                     }
             }
+            // Settings sheet only (beta2): values, the Done button and
+            // row icons use the primary color — white in dark mode —
+            // instead of the app-wide red accent. Toggles keep their own
+            // green tint and the slider its primary tint inside Settings.
+            .tint(.primary)
         }
         .alert("新建歌单", isPresented: $showNewPlaylist) {
             TextField("歌单名称", text: $newPlaylistName)
