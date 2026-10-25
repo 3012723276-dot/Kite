@@ -13,7 +13,10 @@ import CryptoKit
 enum NeteaseCrypto {
     private static let weapiPresetKey = "0CoJUm6Qyw8W8jud"
     private static let weapiIV = "0102030405060708"
-    private static let weapiSecretKey = "Kite2026abcDEF"
+    // DO NOT RENAME: this key must stay exactly 16 bytes for AES-128, and
+    // weapiEncSecKey below was precomputed for this exact key. Renaming
+    // Kumone -> Kite shortened it to 14 bytes and crashed every weapi call.
+    private static let weapiSecretKey = "Kumone2026abcDEF"
     private static let weapiEncSecKey =
         "38cef2efdbcc1cfd6a44d81620dae5d23091f50ef27e01a1b1bb7e998e0fde2d" +
         "7ab6002a9e79a3c195f661cbde80e21e6245997b11b54d28407115822f95d447" +
