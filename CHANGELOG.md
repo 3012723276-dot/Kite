@@ -542,12 +542,17 @@
 - Release notes are now structured by change category with English and Chinese stacked under each section (GitHub Releases and Sparkle update notes)
 - 更新说明改为按变更分类组织，每节内英文在上、中文在下（GitHub Release 与 Sparkle 更新弹窗同步生效）
 
-## 0.1.6 - 2026-08-16
-
-### Improved / 改进
-
-- The "+" button next to Created Playlists now anchors to the trailing edge aligned with the playlist rows, independent of header text length in any language
-- 「创建的歌单」的加号按钮改为尾部锚定并与歌单行右缘对齐，位置不再受各语言标题长度影响
+## 0.1.6 - 2026-10-25
+### Added / 新增
+- Traditional Chinese localization; the app follows the system language
+- Settings now has a Contact Us section; long-press any contact value to copy it
+- 繁体中文界面，App 跟随系统语言
+- 设置新增"联系我们"一栏，长按任意联系方式可复制
+### Fixed / 修复
+- Contact Us email address now matches the other rows (no longer red)
+- In-app update check now points to this repository (3012723276-dot/Kite) instead of the upstream repo
+- 设置页联系方式里的邮箱不再显示红色，与其他行一致
+- 应用内检查更新改为查本仓库，不再查上游仓库
 
 ## 0.1.5 - 2026-08-16
 
