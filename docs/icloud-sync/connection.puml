@@ -1,0 +1,55 @@
+@startuml connection
+!pragma layout smetana
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Connection Authorization and Recovery
+
+state "Disconnected\nconnected = false" as Disconnected
+state "Connecting\ncaptures a new connectionID" as Connecting
+state "Waiting for folder authorization\nenable() returns false" as Picker
+state "Connected\nenabled = true / connected = true" as Connected
+state "Unavailable\nconnected = false / error shown\nenabled keeps the user's intent" as Failed
+state "Disabled\nenabled = false / connected = false" as Disabled
+
+[*] --> Disconnected
+Disconnected --> Connecting : enable / connect (picked folder)
+Disabled --> Connecting : enable again
+Connecting --> Picker : no saved bookmark and no iCloud container
+Picker --> Connecting : user picks a folder → connect(to:)
+Picker --> Disconnected : authorization not completed
+Connecting --> Connected : device identity, folder and repository valid\nactivate → periodic task → folder observation → immediate sync
+Connecting --> Failed : restore / authorization / validation failed
+Connected --> Connected : ordinary domain error\nrecord error and retry work
+Connected --> Failed : sync hits SyncError.unavailable\ninvalidateConnection → repository.disconnect
+Failed --> Connecting : reconnect / re-authorize
+Connected --> Connecting : replace folder / reconnect
+Connected --> Disabled : disable()
+Failed --> Disabled : disable()
+Connecting --> Disabled : superseded by turning sync off
+Connected --> Disabled : iCloud identity changed\nalso clears login sharing consent, bookmark and identity token
+
+note right of Connecting
+  invalidateConnection runs before every new connection:
+  1. new connectionID; clear remote lists and pending work
+  2. cancel coalescing / execution / periodic tasks
+  3. invalidate continue requests and publication baselines
+  4. disconnect the previous repository connection
+
+  enable: bookmark → restore; otherwise try the container.
+  connect: the picked root or its Kite subfolder.
+  restore never re-creates a deleted authorized folder.
+end note
+note right of Connected
+  The picked-folder and restore entry points each start
+  one security scope, owned by repository.scopedURL on success.
+  The iCloud container needs no security scope.
+  Released on disconnect or when the entry point fails.
+
+  After every await the operation's connection is checked;
+  a stale operation can neither activate nor clear its replacement.
+end note
+note bottom of Disabled
+  A plain disable does not withdraw cloud files or sign out remotely.
+  The local account, playback restore and saved preferences remain.
+end note
+@enduml
