@@ -6,11 +6,10 @@ import os.log
 enum UnblockService {
     private static let log = Logger(subsystem: "im.missuo.Kite", category: "audio-source")
     private static let httpClient = AudioSourceClient.shared
+    // Kuwo stays last: it is the final fallback after pyncmd and Kugou.
     private static let fallbackProviders: [any AudioSourceProvider] = [
-        BilibiliAudioSourceProvider(),
         KugouAudioSourceProvider(),
         KuwoAudioSourceProvider(),
-        BodianAudioSourceProvider(),
     ]
 
     struct Resolution {
