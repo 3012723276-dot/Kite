@@ -1,0 +1,64 @@
+@startuml scheduling
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Request Coalescing, Single Execution Task and Retries
+
+participant "Targeted subscriptions / folder events" as Event
+participant "Immediate callers\nconnection / scene / periodic / toggles" as Caller
+participant "SyncService" as Service
+collections "pendingSyncRequest\nrefreshDomains + publicationDomains" as Pending
+participant "coalescingTask" as Window
+participant "syncTask\nowning connectionID" as Worker
+participant "Domains / Repository" as Domains
+
+Event -> Service : scheduleSync(request)
+Service -> Pending : formUnion each domain set
+alt a syncTask or coalescingTask already exists
+  note over Service,Pending : merge only; the wait is not restarted and no second task is created
+else idle
+  Service -> Window : create one task that waits 600 ms
+  ... later events during the wait only merge ...
+  Window -> Service : same connectionID → clear the coalescing handle
+  Service -> Service : ensureSyncTask()
+end
+
+opt synchronizeNow(refreshing:publishing:)
+  Caller -> Service : sync now
+  Service -> Pending : formUnion(request)
+  Service -> Window : cancel; clear the handle
+  Service -> Service : ensureSyncTask()
+  note over Caller,Worker : the caller awaits the same syncTask.value
+end
+
+Service -> Worker : reuse the existing task, or create the only one
+loop connection valid, same generation, not cancelled; another round only for new events
+  Worker -> Pending : take this round's request; clear pending work
+  Worker -> Domains : synchronizeDomains(currentRequest)
+  note right of Domains
+    Processed serially in Domain.allCases order.
+    Connection / cancellation re-checked before each domain.
+    Preferences and login refreshes may write back.
+  end note
+  Event -> Service : new events may arrive while waiting on I/O
+  Service -> Pending : merge new requests
+  Domains --> Worker : retryRequest + error summary
+  alt SyncError.unavailable occurred
+    Worker -> Service : connection invalidated; clear lists / pending work / tasks
+    Service -> Domains : disconnect the repository
+    note over Worker : the old task ends
+  else connection still valid
+    Worker -> Pending : note whether new events arrived, then merge retryRequest
+    alt no new events (even with failed work pending)
+      note over Worker,Pending : this round ends; failures wait for a later event or periodic wake-up
+    else new events
+      note over Worker,Pending : the same task takes the next round; no parallel transaction
+    end
+  end
+end
+Worker -> Service : defer: only the current connection may clear its own syncTask
+note over Service,Worker
+  Finishing the execution task does not maintain the periodic task.
+  After a connection change, a returning old task must not overwrite
+  the new task's handle or results.
+end note
+@enduml
