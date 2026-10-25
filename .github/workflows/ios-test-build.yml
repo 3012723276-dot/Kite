@@ -1,6 +1,6 @@
 name: iOS Test IPA Build
 
-# TEMPORARY test-only workflow on test/0.1.6-beta4.
+# TEMPORARY test-only workflow on test/0.1.6-beta5.
 # It builds an unsigned IPA and uploads it as a workflow artifact.
 # It deliberately does NOT create a GitHub release, tag, or touch main.
 # Push trigger is included only because GitHub's web UI cannot run a
@@ -12,9 +12,9 @@ on:
       version:
         description: "Test version, e.g. 0.1.6 (without the leading v)"
         required: true
-        default: "0.1.6-Beta4"
+        default: "0.1.6-Beta5"
   push:
-    branches: [test/0.1.6-beta4]
+    branches: [test/0.1.6-beta5]
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       - name: Derive version
         run: |
           VERSION="${{ inputs.version }}"
-          if [ -z "$VERSION" ]; then VERSION="0.1.6-Beta4"; fi
+          if [ -z "$VERSION" ]; then VERSION="0.1.6-Beta5"; fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
 
