@@ -106,6 +106,7 @@ final class SettingsManager: ObservableObject {
         static let fmMode = "settings.fmMode"
         static let unblock = "settings.enableUnblock"
         static let unblockSources = "settings.enabledUnblockSources"
+        static let unblockSourcesBilibiliBodianMigrated = "settings.enabledUnblockSources.bilibiliBodianMigrated"
         static let autoCheckUpdates = "settings.autoCheckUpdates"
         static let desktopLyrics = "settings.showDesktopLyrics"
         #if os(macOS)
@@ -340,7 +341,18 @@ final class SettingsManager: ObservableObject {
         verbatimLyrics = defaults.object(forKey: Keys.verbatimLyrics) as? Bool ?? true
         enableUnblock = defaults.object(forKey: Keys.unblock) as? Bool ?? true
         if let rawSourceIDs = defaults.stringArray(forKey: Keys.unblockSources) {
-            enabledAudioSourceIDs = Set(rawSourceIDs.compactMap(AudioSourceID.init))
+            var stored = Set(rawSourceIDs.compactMap(AudioSourceID.init))
+            // One-time migration for existing installs: the Bilibili and
+            // Bodian toggles did not exist when their stored set was saved,
+            // so they would otherwise show up switched off. Only add the
+            // two new sources; never re-enable an old source the user
+            // deliberately switched off.
+            if !defaults.bool(forKey: Keys.unblockSourcesBilibiliBodianMigrated) {
+                stored.insert(.bilibili)
+                stored.insert(.bodian)
+                defaults.set(true, forKey: Keys.unblockSourcesBilibiliBodianMigrated)
+            }
+            enabledAudioSourceIDs = stored
         } else {
             enabledAudioSourceIDs = Set(AudioSourceID.allCases)
         }

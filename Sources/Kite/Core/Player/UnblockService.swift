@@ -7,8 +7,10 @@ enum UnblockService {
     private static let log = Logger(subsystem: "im.missuo.Kite", category: "audio-source")
     private static let httpClient = AudioSourceClient.shared
     private static let fallbackProviders: [any AudioSourceProvider] = [
+        BilibiliAudioSourceProvider(),
         KugouAudioSourceProvider(),
         KuwoAudioSourceProvider(),
+        BodianAudioSourceProvider(),
     ]
 
     struct Resolution {

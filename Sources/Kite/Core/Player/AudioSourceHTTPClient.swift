@@ -43,21 +43,26 @@ struct AudioSourceClient {
         from urlString: String,
         source: AudioSourceID,
         operation: String,
-        userAgent: String = "Mozilla/5.0"
+        userAgent: String = "Mozilla/5.0",
+        headers: [String: String] = [:]
     ) async throws -> Data {
         guard let url = URL(string: urlString) else { throw AudioSourceError.invalidURL }
-        return try await data(from: url, source: source, operation: operation, userAgent: userAgent)
+        return try await data(from: url, source: source, operation: operation, userAgent: userAgent, headers: headers)
     }
 
     func data(
         from url: URL,
         source: AudioSourceID,
         operation: String,
-        userAgent: String = "Mozilla/5.0"
+        userAgent: String = "Mozilla/5.0",
+        headers: [String: String] = [:]
     ) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        for (field, value) in headers {
+            request.setValue(value, forHTTPHeaderField: field)
+        }
         return try await execute(request, source: source, operation: operation)
     }
 
