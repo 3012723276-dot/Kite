@@ -1,0 +1,38 @@
+name: Android Cleanup (one-time)
+
+# 一次性清理：删旧 android/ 目录和旧安卓发布。
+# 只删 android/ 与 android-v* 发布，不动 iOS、macOS、README 等其他文件。
+# 跑完后请手动删除本 workflow 文件（或由后续步骤处理）。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete old android directory and old Android releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -d android ]; then
+            git rm -r --cached android || true
+            rm -rf android
+            git add -A
+            git commit -m "Remove old Android code (replaced by upstream Android source)" || echo "nothing to commit"
+            git push origin main
+          else
+            echo "android/ already gone"
+          fi
+          for tag in android-v0.1.0 android-v0.1.1; do
+            gh release delete "$tag" --yes --cleanup-tag || echo "release $tag not found or already deleted"
+          done
+          ls -d android 2>&1 || echo "android/ confirmed gone"
