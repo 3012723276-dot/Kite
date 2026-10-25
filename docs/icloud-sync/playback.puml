@@ -1,0 +1,76 @@
+@startuml playback
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Playback: Lightweight Discovery, On-Demand Continue and Queue Publication
+
+actor "User" as User
+participant "SyncService" as Service
+participant "SyncRepository actor" as Repo
+participant "PlaybackSyncStore\nsame repository isolation" as Store
+database "Devices/<deviceID>/\nplayback.json + Queues/" as Files
+participant "PlayerService" as Player
+
+== Refresh the continue list ==
+Service -> Repo : readPlayback(connectionID)
+Repo -> Store : read
+Store -> Repo : read(.playback, PlaybackCheckpoint)
+Repo -> Files : read each device's current pointer and conflict versions (cache may hit)
+Files --> Store : lightweight records
+Store -> Store : highest revision per device (including tombstones)\nvalidate checkpoints; observe all revision counters
+Store --> Service : checkpoints + maxCounter
+Service -> Service : exclude this device / tombstones; update sessions
+note over Service,Store : no full queue is read at this stage; the UI filters by the current account
+
+== Tap on Continue ==
+User -> Service : resume(selectedCheckpoint)
+Service -> Service : check connection and same account\nrecord connectionID / resumeRequestID / resumingDeviceID
+Service -> Repo : loadPlayback(selectedRecord)
+Repo -> Store : load
+Store -> Files : read only the selected queueRevision.json
+alt queue missing / still downloading / invalid
+  Store --> Service : downloading / invalidRecord / I/O error
+  Service --> User : error for this operation; local playback kept
+else queue available
+  Store -> Store : check device, revision relation, account, cursor\nassemble PlaybackSession; release the previously selected queue cache
+  Store --> Service : session
+  Service -> Service : re-check cancellation, connection, request,\ncurrent account and that the record still exists
+  Service -> Player : resume(session)
+  note over Service,Player : local playback is replaced only on success; the source device is not paused
+end
+
+== Local publication check ==
+Service -> Player : current session + authenticatedAccountID
+alt no valid session for the same account
+  opt this device has published playback before
+    Service -> Repo : writePlayback(payload: nil)
+    Repo -> Files : write this device's checkpoint tombstone
+  end
+else session content / progress changed, or not yet published
+  Service -> Repo : writePlayback(record)
+  Repo -> Store : write
+  opt this connection has no cache of this device's published queue
+    Store -> Files : read this device's old pointer and queue on demand\nto restore the reuse baseline
+    note right of Store
+      Old queue actually missing: the new session may publish.
+      Present but not downloaded or damaged: fail explicitly, never mask it.
+    end note
+  end
+  alt snapshot content unchanged and queue file exists
+    Store -> Store : reuse queueRevision
+  else snapshot content changed or file missing
+    Store -> Files : first write immutable Queues/<newUUID>.json
+  end
+  Store -> Files : then atomically replace playback.json
+  note over Store,Files : progress, current track, cursor and repeat mode live in the checkpoint;\nthe queue is not copied again
+  opt first maintenance on this connection, or 24 h since the last successful one
+    Store -> Files : coordinated read of current / conflict pointers;\nremove orphaned queues older than 7 days
+    note right of Store
+      Kept: referenced by current / conflict / previous snapshot,
+      modified within 7 days, unknown file names.
+      No modification date: kept until a normal maintenance cycle.
+      Metadata / delete failures: logged; never fail publication or disconnect.
+    end note
+  end
+  Repo --> Service : on success update lastPublishedPlayback / hasPublishedPlayback
+end
+@enduml
