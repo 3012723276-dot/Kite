@@ -77,6 +77,13 @@ struct SettingsView: View {
                             }
                         ))
                     }
+                    // Kuwo is the last source in AudioSourceID.allCases,
+                    // so this footnote sits directly under the Kuwo row,
+                    // in the same caption style as the gray-song-unlock
+                    // footnote above. It is not a footnote for that row.
+                    Text("因版权问题，部分歌曲目前暂不支持播放，建议从云端导入")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } header: {
                     Text("音源")
                 }
