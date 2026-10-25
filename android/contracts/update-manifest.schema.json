@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kumone signed update manifest",
+  "type": "object",
+  "required": ["schema_version", "product", "version", "channel", "signed", "assets"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "product": {"const": "kumone"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:\\.[0-9]+)?$"},
+    "channel": {"enum": ["stable", "prerelease"]},
+    "signed": {"type": "boolean"},
+    "public_key_id": {"type": ["string", "null"]},
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["platform", "url", "sha256", "signature"],
+        "properties": {
+          "platform": {"enum": ["windows-x64", "linux-x86_64", "android"]},
+          "url": {"type": "string", "format": "uri"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "signature": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

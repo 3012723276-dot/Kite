@@ -1,0 +1,35 @@
+[workspace]
+members = [
+    "crates/kumone-core",
+    "crates/kumone-ffi",
+    "tools/uniffi-bindgen",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.3.12"
+edition = "2024"
+license = "LGPL-3.0-only"
+rust-version = "1.85"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "warn"
+
+# Keep the desktop payload small without changing runtime dependencies.  The
+# AppImage still carries WebKitGTK, but stripping the Rust shell and using size
+# optimisation avoids shipping duplicate debug/unwind data in every bundle.
+[profile.release]
+opt-level = "z"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+# UniFFI's release library carries generation metadata consumed by the Android
+# binding step.  Keep that metadata while still stripping the desktop/core
+# payloads that are shipped to users.
+[profile.release.package.kumone-ffi]
+strip = "none"

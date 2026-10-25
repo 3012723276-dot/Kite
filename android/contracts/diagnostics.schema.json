@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kumone local diagnostics",
+  "type": "object",
+  "required": ["schema_version", "product", "platform", "app_version", "privacy", "events"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "product": {"const": "kumone"},
+    "platform": {"type": "string"},
+    "app_version": {"type": "string"},
+    "privacy": {"const": {"redacted": true, "network_upload": false}},
+    "events": {"type": "array", "maxItems": 50}
+  }
+}

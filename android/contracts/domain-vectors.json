@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "session": {
+    "raw_cookie_string": "MUSIC_U=music-token; Path=/;; __csrf=csrf-token; Secure;; NMTID=device-cookie; HttpOnly;; empty=;; malformed",
+    "expected_inserted": 3,
+    "expected_logged_in": true,
+    "expected_cookie_header_contains": [
+      "MUSIC_U=music-token",
+      "__csrf=csrf-token",
+      "NMTID=device-cookie",
+      "appver=3.1.17",
+      "os=pc"
+    ]
+  },
+  "weapi_request": {
+    "path": "/search/get",
+    "payload": {"s": "Kumone"},
+    "expected_method": "POST",
+    "expected_url": "https://music.163.com/weapi/search/get?csrf_token=csrf-token",
+    "required_headers": ["Content-Type", "Cookie", "Referer", "User-Agent"],
+    "body_prefix": "params=",
+    "body_contains": "&encSecKey="
+  },
+  "search": {
+    "response": {
+      "code": 200,
+      "result": {
+        "songCount": 2,
+        "songs": [
+          {
+            "id": 1,
+            "name": "Modern",
+            "ar": [{"id": 11, "name": "Artist A"}],
+            "al": {"id": 21, "name": "Album A", "picUrl": "https://img/a.jpg"},
+            "dt": 180000,
+            "alia": ["Alias A"],
+            "tns": ["Translation A"]
+          },
+          {
+            "id": 2,
+            "name": "Legacy",
+            "artists": [{"id": 12, "name": "Artist B"}],
+            "album": {"id": 22, "name": "Album B"},
+            "duration": 200000,
+            "alias": ["Alias B"]
+          }
+        ]
+      }
+    },
+    "expected_total": 2,
+    "expected_first_artist_names": "Artist A",
+    "expected_first_subtitle": "Translation A",
+    "expected_second_duration_ms": 200000,
+    "expected_second_subtitle": "Alias B"
+  },
+  "lyrics": {
+    "response": {
+      "code": 200,
+      "lrc": {"lyric": "[00:01.00]主歌词\n[00:02.50]第二行"},
+      "tlyric": {"lyric": "[00:01.00]Translation"},
+      "romalrc": {"lyric": "[00:01.00]Romaji"},
+      "lyricUser": {"nickname": "Lyric Author"},
+      "transUser": {"nickname": "Translation Author"}
+    },
+    "expected_line_count": 2,
+    "expected_first_time_ms": 1000,
+    "expected_first_text": "主歌词",
+    "expected_first_translation": "Translation",
+    "expected_first_romaji": "Romaji",
+    "expected_contributor": "Lyric Author",
+    "expected_translation_contributor": "Translation Author"
+  }
+}

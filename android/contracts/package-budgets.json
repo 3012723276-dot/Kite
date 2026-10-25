@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "budgets_mib": {
+    "windows_installer": 15,
+    "linux_appimage": 80,
+    "linux_deb": 25,
+    "linux_rpm": 25,
+    "android_apk": 15
+  },
+  "notes": {
+    "linux_appimage": "Self-contained WebKitGTK runtime; release profile strips the Rust shell and CI reports component sizes.",
+    "windows_installer": "Unsigned or Authenticode-signed NSIS installer; certificate status is recorded separately."
+  }
+}

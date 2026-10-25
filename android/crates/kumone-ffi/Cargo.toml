@@ -1,0 +1,15 @@
+[package]
+name = "kumone-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+kumone-core = { path = "../kumone-core" }
+serde_json = "1"
+uniffi = "=0.32.0"

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "colors": {
+      "background": "#0f1115",
+      "surface": "#171a21",
+      "surface_elevated": "#202530",
+      "accent": "#8ab4ff",
+      "text_primary": "#f4f6fb",
+      "text_secondary": "#aab2c0",
+      "text_muted": "#717b8d",
+      "error": "#ff8c8c",
+      "success": "#7dd3a8",
+      "warning": "#f6c66d"
+    },
+    "spacing_dp": [4, 8, 12, 16, 24, 32],
+    "radii_dp": [8, 12, 16, 24]
+  },
+  "states": {
+    "loading": {"title": "Loading", "retryable": false},
+    "empty": {"title": "Nothing here yet", "retryable": false},
+    "auth_required": {"title": "Sign in required", "retryable": false},
+    "external_challenge": {"title": "NetEase verification required", "retryable": true},
+    "region_restricted": {"title": "Unavailable in this region", "retryable": false},
+    "error": {"title": "Something went wrong", "retryable": true},
+    "offline": {"title": "Check your connection", "retryable": true}
+  },
+  "operations": ["login", "search", "playlist", "daily_songs", "lyrics", "playback", "update", "diagnostics"]
+}
