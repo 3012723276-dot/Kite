@@ -74,6 +74,7 @@ final class ExploreViewModel: ObservableObject {
 }
 
 struct ExploreView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @StateObject private var model = ExploreViewModel.shared
     @EnvironmentObject private var player: PlayerService
 
@@ -123,7 +124,7 @@ struct ExploreView: View {
                 PlayerClearanceSpacer()
             }
         }
-        .navigationTitle("精选")
+        .navigationTitle(AppLanguageBundle.localizedString("精选"))
         .task {
             if model.playlists.isEmpty, model.toplists.isEmpty {
                 await model.loadMore()
@@ -210,6 +211,7 @@ struct ToplistGrid: View {
 }
 
 struct ToplistsView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @State private var toplists: [ToplistItem] = []
 
     var body: some View {
@@ -220,7 +222,7 @@ struct ToplistsView: View {
                 PlayerClearanceSpacer()
             }
         }
-        .navigationTitle("排行榜")
+        .navigationTitle(AppLanguageBundle.localizedString("排行榜"))
         .task {
             if toplists.isEmpty {
                 toplists = (try? await NeteaseAPI.toplists()) ?? []
