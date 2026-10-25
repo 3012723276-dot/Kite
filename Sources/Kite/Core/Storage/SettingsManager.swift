@@ -1,3 +1,4 @@
+import ObjectiveC
 import SwiftUI
 
 enum AudioQuality: String, CaseIterable, Identifiable {
@@ -49,6 +50,33 @@ enum AppAppearance: String, CaseIterable, Identifiable {
         case .light: return .light
         case .dark: return .dark
         }
+    }
+}
+
+/// In-app language (beta2). Each option is always shown in its own script —
+/// never translated — so 简体中文 stays 简体中文, 繁體中文 stays 繁體中文,
+/// and English stays English, whichever UI language is active.
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case simplifiedChinese = "zh-Hans"
+    case traditionalChinese = "zh-Hant"
+    case english = "en"
+
+    var id: String { rawValue }
+
+    var nativeName: String {
+        switch self {
+        case .simplifiedChinese: return "简体中文"
+        case .traditionalChinese: return "繁體中文"
+        case .english: return "English"
+        }
+    }
+
+    /// The language the app bundle itself would pick for the system language.
+    static var systemDefault: AppLanguage {
+        let first = Bundle.main.preferredLocalizations.first ?? ""
+        if first.hasPrefix("zh-Hant") { return .traditionalChinese }
+        if first.hasPrefix("zh") { return .simplifiedChinese }
+        return .english
     }
 }
 
@@ -118,6 +146,7 @@ final class SettingsManager: ObservableObject {
         static let outputDevice = "settings.outputDeviceUID"
         #endif
         static let desktopLyricsCentered = "settings.desktopLyricsCentered"
+        static let language = "settings.appLanguage"
         static let mainWindowAmbientBackground = "settings.showMainWindowAmbientBackground"
         static let mainWindowAmbientBackgroundIntensity = "settings.mainWindowAmbientBackgroundIntensity"
         static let enableAudioCache = "settings.enableAudioCache"
@@ -168,6 +197,29 @@ final class SettingsManager: ObservableObject {
 
     @Published var appearance: AppAppearance {
         didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Keys.appearance) }
+    }
+
+    /// Explicit in-app language choice, or nil to follow the system language.
+    /// The picker only offers the three languages; there is no "follow system"
+    /// row — once a language is picked it stays picked.
+    @Published var appLanguage: AppLanguage? {
+        didSet {
+            if let appLanguage {
+                UserDefaults.standard.set(appLanguage.rawValue, forKey: Keys.language)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Keys.language)
+            }
+            AppLanguageBundle.install()
+        }
+    }
+
+    /// The language actually in use: the explicit choice, or the system one.
+    var effectiveAppLanguage: AppLanguage { appLanguage ?? .systemDefault }
+
+    /// Picker order: the current language first, then the other two in
+    /// canonical order (Simplified, Traditional, English).
+    var orderedAppLanguages: [AppLanguage] {
+        [effectiveAppLanguage] + AppLanguage.allCases.filter { $0 != effectiveAppLanguage }
     }
 
     @Published var nowPlayingMode: NowPlayingMode {
@@ -332,6 +384,8 @@ final class SettingsManager: ObservableObject {
         audioCacheSizeMB = normalizedAudioCacheSizeMB
         defaults.set(normalizedAudioCacheSizeMB, forKey: Keys.audioCacheSizeMB)
         appearance = defaults.string(forKey: Keys.appearance).flatMap(AppAppearance.init) ?? .auto
+        appLanguage = defaults.string(forKey: Keys.language).flatMap(AppLanguage.init)
+        AppLanguageBundle.install()
         nowPlayingMode = defaults.string(forKey: Keys.nowPlayingMode).flatMap(NowPlayingMode.init) ?? .immersive
         showLyricsTranslation = defaults.object(forKey: Keys.showTranslation) as? Bool ?? true
         // Carry over the old on/off romaji toggle for anyone who had it on.
@@ -369,5 +423,38 @@ final class SettingsManager: ObservableObject {
             max(storedAmbientBackgroundIntensity, Self.mainWindowAmbientBackgroundIntensityRange.lowerBound),
             Self.mainWindowAmbientBackgroundIntensityRange.upperBound
         )
+    }
+}
+
+/// In-app language override (beta2): redirect Bundle.main string lookups to
+/// the chosen language's .lproj so picking a language re-localizes the UI
+/// immediately, without restarting the app. When no language is chosen, the
+/// stored key is absent and lookups behave exactly as before (system
+/// language). The choice is read straight from UserDefaults here so the
+/// redirect is safe from any thread; the swizzle itself installs once.
+enum AppLanguageBundle {
+    static let install: Void = {
+        guard
+            let original = class_getInstanceMethod(
+                Bundle.self, #selector(Bundle.localizedString(forKey:value:table:))),
+            let swizzled = class_getInstanceMethod(
+                Bundle.self, #selector(Bundle.kite_localizedString(forKey:value:table:)))
+        else { return }
+        method_exchangeImplementations(original, swizzled)
+    }()
+}
+
+extension Bundle {
+    @objc func kite_localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
+        // After the exchange, calling kite_localizedString invokes the
+        // original implementation — both in the redirect below (the language
+        // bundle is not .main) and in the fallthrough.
+        if self === Bundle.main,
+           let code = UserDefaults.standard.string(forKey: SettingsManager.Keys.language),
+           let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let languageBundle = Bundle(path: path) {
+            return languageBundle.kite_localizedString(forKey: key, value: value, table: tableName)
+        }
+        return self.kite_localizedString(forKey: key, value: value, table: tableName)
     }
 }
