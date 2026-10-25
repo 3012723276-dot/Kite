@@ -303,19 +303,15 @@ struct SettingsView: View {
 }
 
 /// Contact icons for the "联系我们" section, drawn at the same size as
-/// the other Settings rows' SF Symbol icons (about 22 pt). Telegram keeps
-/// its blue circle with a white paper plane, matching the Telegram app
-/// icon; the other three are monochrome, like the surrounding rows.
+/// the other Settings rows' SF Symbol icons (about 22 pt). All four are
+/// monochrome, like the surrounding rows; Telegram is just its paper
+/// plane shape, with no blue circle behind it.
 private enum ContactIcon {
     static var telegram: some View {
-        ZStack {
-            Circle()
-                .fill(Color(red: 0.13, green: 0.62, blue: 0.85))
-            TelegramPaperPlane()
-                .fill(Color.white)
-                .padding(5)
-        }
-        .frame(width: 22, height: 22)
+        TelegramPaperPlane()
+            .fill(Color.primary)
+            .padding(2)
+            .frame(width: 22, height: 22)
     }
 
     static var twitter: some View {
