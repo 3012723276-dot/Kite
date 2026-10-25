@@ -30,7 +30,7 @@ self.httpClient = httpClient
 
 func resolve(track: Track) async throws -> ResolvedAudioSource? {
 let query = AudioSourceTrackMatcher.keyword(for: track)
-.addingPercentEncoding(withAllowedCharacters:.urlQueryAllowed)?? ""
+.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 let searchURL = "https://api.bilibili.com/x/web-interface/search/type"
 + "?keyword=\(query)&search_type=video&page=1&page_size=10"
 let data = try await httpClient.data(
@@ -52,7 +52,7 @@ let durationString = item["duration"] as? String,
 let durationMS = Self.durationMS(from: durationString)
 else { return nil}
 let title = Self.stripHTML(rawTitle)
-let author = (item["author"] as? String)?? ""
+let author = (item["author"] as? String) ?? ""
 guard Self.matches(track: track, title: title, author: author, durationMS: durationMS)
 else { return nil}
 return Video(bvid: bvid, title: title)
@@ -105,19 +105,19 @@ let title: String
 }
 
 private static func stripHTML(_ value: String) -> String {
-value.replacingOccurrences(of: "<[^>]+>", with: "", options:.regularExpression)
+value.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
 }
 
 private static func durationMS(from value: String) -> Int? {
 let parts = value.split(separator: ":").compactMap { Int($0)}
-guard!parts.isEmpty else { return nil}
+guard !parts.isEmpty else { return nil}
 var seconds = 0
 for part in parts { seconds = seconds * 60 + part}
 return seconds * 1_000
 }
 
 private static func normalized(_ value: String) -> String {
-value.folding(options: [.caseInsensitive,.diacriticInsensitive,.widthInsensitive], locale:.current)
+value.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: .current)
 .unicodeScalars
 .filter(CharacterSet.alphanumerics.contains)
 .map { String($0)}
@@ -134,9 +134,9 @@ abs(durationMS - track.durationMS) <= 5_000
 else { return false}
 let normalizedTitle = normalized(title)
 let normalizedName = normalized(track.name)
-guard!normalizedName.isEmpty, normalizedTitle.contains(normalizedName) else { return false}
-let expectedArtist = normalized(track.artists.first?.name?? "")
-guard!expectedArtist.isEmpty,
+guard !normalizedName.isEmpty, normalizedTitle.contains(normalizedName) else { return false}
+let expectedArtist = normalized(track.artists.first?.name ?? "")
+guard !expectedArtist.isEmpty,
 normalizedTitle.contains(expectedArtist) || normalized(author).contains(expectedArtist)
 else { return false}
 let originalMarkers = Set(versionMarkers.filter { normalized(track.name).contains($0)})
