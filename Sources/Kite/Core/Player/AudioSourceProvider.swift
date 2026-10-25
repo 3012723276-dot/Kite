@@ -8,8 +8,8 @@ enum AudioSourceID: String, CaseIterable, Hashable {
     var displayName: String {
         switch self {
         case .pyncmd: return "pyncmd"
-        case .kugou: return String(localized: "酷狗音乐")
-        case .kuwo: return String(localized: "酷我音乐")
+        case .kugou: return AppLanguageBundle.localizedString("酷狗音乐")
+        case .kuwo: return AppLanguageBundle.localizedString("酷我音乐")
         }
     }
 }
