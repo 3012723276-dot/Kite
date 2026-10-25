@@ -13,15 +13,18 @@ import CryptoKit
 enum NeteaseCrypto {
     private static let weapiPresetKey = "0CoJUm6Qyw8W8jud"
     private static let weapiIV = "0102030405060708"
-    // DO NOT RENAME: this key must stay exactly 16 bytes for AES-128, and
-    // weapiEncSecKey below was precomputed for this exact key. Renaming
-    // Kumone -> Kite shortened it to 14 bytes and crashed every weapi call.
-    private static let weapiSecretKey = "Kumone2026abcDEF"
+    // DO NOT CHANGE LENGTH OR KEY WITHOUT RECOMPUTING encSecKey: this key
+    // must stay exactly 16 bytes for AES-128, and weapiEncSecKey below is
+    // the raw-RSA encryption (reverse the key, pow with exponent 65537 and
+    // the NetEase modulus) of this exact key. The 0.1.1 restore used a
+    // capital-K variant that would not match the server's decrypted key,
+    // so this Kite key and its matching encSecKey replace it.
+    private static let weapiSecretKey = "Kite2026abcDEF16"
     private static let weapiEncSecKey =
-        "38cef2efdbcc1cfd6a44d81620dae5d23091f50ef27e01a1b1bb7e998e0fde2d" +
-        "7ab6002a9e79a3c195f661cbde80e21e6245997b11b54d28407115822f95d447" +
-        "7cc06b5a77de46fab6568410abf1229abef81b4c8588f386149010d190bb0b04" +
-        "f064be330bd877a4d4b99514febbdb4335b10744b13d9f7ee24d314d6e62cdc9"
+        "0be90bcb937777b506976d2f0c3740e31dd392ff43e52a409594e07b10588b92" +
+        "c26ff4a429d4a1f782061afc42028f807e63396baf78735b443e5c5291f8e35e" +
+        "ca26efb138072431ee4304c2c2a299891230e2ce39c346169a5ebf797f6b9d45" +
+        "4b05abfd63b221236b43907458c0dcffb64faec1220e6ce2b8ab3361c4a4f055"
     private static let eapiKey = "e82ckenh8dichen8"
 
     /// Encrypts a JSON payload for a `/weapi/...` endpoint.
