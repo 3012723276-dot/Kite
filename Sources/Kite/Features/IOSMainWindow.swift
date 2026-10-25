@@ -261,6 +261,7 @@ public struct IOSMainWindow: View {
                 Label("搜索", systemImage: "magnifyingglass")
             }
         }
+        .tint(.blue)
     }
 
     private var customTabInterface: some View {
@@ -644,11 +645,11 @@ struct IOSLibraryView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: 32))
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.white)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("登录网易云音乐")
                                     .font(.headline)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(.white)
                                 Text("同步我喜欢的音乐、歌单与每日推荐")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
@@ -656,15 +657,18 @@ struct IOSLibraryView: View {
                         }
                         .padding(.vertical, 6)
                     }
-                    .tint(.blue)
                 }
             }
 
             Section {
                 NavigationLink(value: Destination.downloaded) {
-                    Label("已下载", systemImage: "arrow.down.circle.fill")
+                    Label {
+                        Text("已下载")
+                    } icon: {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.blue)
+                    }
                 }
-                .tint(.blue)
             }
 
             if account.hasAuthCookie {
@@ -758,7 +762,7 @@ struct IOSLibraryView: View {
                 } label: {
                     Image(systemName: "gearshape")
                 }
-                .tint(.blue)
+                .tint(.white)
                 .accessibilityLabel("设置")
             }
         }
