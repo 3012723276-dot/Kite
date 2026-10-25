@@ -55,6 +55,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("灰色歌曲解锁", isOn: $settings.enableUnblock)
+                    .tint(.green)
                 Text("无版权或下架歌曲将从已启用音源中匹配播放")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -77,6 +78,7 @@ struct SettingsView: View {
                                 }
                             }
                         ))
+                        .tint(.green)
                     }
                     // Kuwo is the last source in AudioSourceID.allCases,
                     // so this footnote sits directly under the Kuwo row,
@@ -116,8 +118,24 @@ struct SettingsView: View {
                     }
                 }
                 #endif
+                // Language row (beta2): sits between the player-page mode
+                // picker and the lyrics-translation toggle. The trailing
+                // value is the current language, shown in its own script;
+                // the picker lists the current language first, then the
+                // other two, with a checkmark on the current one (the
+                // Picker's selection). Names are verbatim, never localized.
+                Picker("语言", selection: Binding(
+                    get: { settings.effectiveAppLanguage },
+                    set: { settings.appLanguage = $0 }
+                )) {
+                    ForEach(settings.orderedAppLanguages) { language in
+                        Text(verbatim: language.nativeName).tag(language)
+                    }
+                }
                 Toggle("显示歌词翻译", isOn: $settings.showLyricsTranslation)
+                    .tint(.green)
                 Toggle("逐字歌词（卡拉OK）", isOn: $settings.verbatimLyrics)
+                    .tint(.green)
                 Picker("日文歌词读音", selection: $settings.lyricsAnnotation) {
                     ForEach(LyricsAnnotation.allCases) { annotation in
                         Text(annotation.displayName).tag(annotation)
@@ -127,6 +145,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("主界面环境色", isOn: $settings.showMainWindowAmbientBackground)
+                    .tint(.green)
                 if settings.showMainWindowAmbientBackground {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
@@ -140,6 +159,7 @@ struct SettingsView: View {
                             in: SettingsManager.mainWindowAmbientBackgroundIntensityRange,
                             step: 0.1
                         )
+                        .tint(.primary)
                         HStack {
                             Text("50%")
                             Spacer()
@@ -151,8 +171,10 @@ struct SettingsView: View {
                 }
                 #if os(macOS)
                 Toggle("桌面歌词", isOn: $settings.showDesktopLyrics)
+                    .tint(.green)
                 if settings.showDesktopLyrics {
                     Toggle("桌面歌词水平居中", isOn: $settings.desktopLyricsCentered)
+                    .tint(.green)
                 }
                 Text("在屏幕上悬浮显示当前歌词，可拖动调整位置")
                     .font(.caption)
@@ -193,6 +215,7 @@ struct SettingsView: View {
 
             Section("更新") {
                 Toggle("启动时自动检查更新", isOn: $settings.autoCheckUpdates)
+                    .tint(.green)
                 Text("关闭后启动不再自动弹出更新提示，仍可手动检查更新")
                     .font(.caption)
                     .foregroundStyle(.secondary)
