@@ -251,7 +251,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("联系我们") {
+            Section("联系作者") {
                 // No leading icons in this section. The three link rows are
                 // plain-style buttons so they render in primary /
                 // secondary colors instead of the app's red accent color
