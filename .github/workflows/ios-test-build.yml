@@ -1,20 +1,20 @@
 name: iOS Test IPA Build
 
-# TEMPORARY test-only workflow on test/beta3.
+# TEMPORARY test-only workflow on test/0.1.6-beta1.
 # It builds an unsigned IPA and uploads it as a workflow artifact.
 # It deliberately does NOT create a GitHub release, tag, or touch main.
-# NOTE (test/beta3 only): a push trigger limited to test/beta3 was added
-# because the GitHub web UI cannot dispatch workflow_dispatch for a workflow
-# that exists only on a non-default branch.
+# Push trigger is included only because GitHub's web UI cannot run a
+# workflow_dispatch workflow that exists only on a non-default branch;
+# the trigger is limited to this test branch.
 on:
-  push:
-    branches: [test/beta3]
   workflow_dispatch:
     inputs:
       version:
-        description: "Test version, e.g. 0.1.5 (without the leading v)"
+        description: "Test version, e.g. 0.1.6-Beta1 (without the leading v)"
         required: true
-        default: "0.1.5-beta3"
+        default: "0.1.6-Beta1"
+  push:
+    branches: [test/0.1.6-beta1]
 
 permissions:
   contents: read
@@ -29,7 +29,9 @@ jobs:
 
       - name: Derive version
         run: |
-          echo "VERSION=${{ inputs.version || '0.1.5-beta3' }}" >> "$GITHUB_ENV"
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then VERSION="0.1.6-Beta1"; fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
 
       - name: Build unsigned iOS app
@@ -40,6 +42,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
             MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             build
+
+      - name: Copy localization tables into app
+        run: |
+          cp -R Sources/Kite/Resources/*.lproj \
+            "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app/"
+          ls "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app/" | grep lproj
 
       - name: Package IPA
         run: |
