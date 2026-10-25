@@ -7,6 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject private var settings: SettingsManager
     @EnvironmentObject private var account: AccountStore
     @Environment(\.openDestination) private var openDestination
+    @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
     #if os(macOS)
     @State private var navigationPath: [SettingsPage] = []
@@ -213,6 +214,55 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            Section("联系我们") {
+                Button {
+                    if let url = URL(string: "https://t.me/Kite_090127") {
+                        openURL(url)
+                    }
+                } label: {
+                    HStack {
+                        ContactIcon.telegram
+                        Text("Telegram")
+                        Spacer()
+                        Text("t.me/Kite_090127")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Button {
+                    if let url = URL(string: "https://x.com/kite_090127?s=11") {
+                        openURL(url)
+                    }
+                } label: {
+                    HStack {
+                        ContactIcon.twitter
+                        Text("Twitter")
+                        Spacer()
+                        Text("x.com/kite_090127")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Button {
+                    if let url = URL(string: "mailto:3012723276@qq.com") {
+                        openURL(url)
+                    }
+                } label: {
+                    HStack {
+                        ContactIcon.email
+                        Text("Email")
+                        Spacer()
+                        Text("3012723276@qq.com")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    ContactIcon.wechat
+                    Text("WeChat")
+                    Spacer()
+                    Text("Kite_090127")
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .formStyle(.grouped)
         .navigationDestination(for: SettingsPage.self) { page in
@@ -250,6 +300,60 @@ struct SettingsView: View {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
     }
 
+}
+
+/// Contact icons for the "联系我们" section, drawn at the same size as
+/// the other Settings rows' SF Symbol icons (about 22 pt). Telegram keeps
+/// its blue circle with a white paper plane, matching the Telegram app
+/// icon; the other three are monochrome, like the surrounding rows.
+private enum ContactIcon {
+    static var telegram: some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 0.13, green: 0.62, blue: 0.85))
+            TelegramPaperPlane()
+                .fill(Color.white)
+                .padding(5)
+        }
+        .frame(width: 22, height: 22)
+    }
+
+    static var twitter: some View {
+        ZStack {
+            Capsule()
+                .frame(width: 18, height: 2.5)
+                .rotationEffect(.degrees(45))
+            Capsule()
+                .frame(width: 18, height: 2.5)
+                .rotationEffect(.degrees(-45))
+        }
+        .frame(width: 22, height: 22)
+    }
+
+    static var email: some View {
+        Image(systemName: "envelope")
+            .frame(width: 22, height: 22)
+    }
+
+    static var wechat: some View {
+        Image(systemName: "bubble.left.and.bubble.right")
+            .frame(width: 22, height: 22)
+    }
+}
+
+private struct TelegramPaperPlane: Shape {
+    func path(in rect: CGRect) -> Path {
+        let width = rect.width
+        let height = rect.height
+        var path = Path()
+        path.move(to: CGPoint(x: width * 0.08, y: height * 0.52))
+        path.addLine(to: CGPoint(x: width * 0.95, y: height * 0.05))
+        path.addLine(to: CGPoint(x: width * 0.72, y: height * 0.92))
+        path.addLine(to: CGPoint(x: width * 0.58, y: height * 0.62))
+        path.addLine(to: CGPoint(x: width * 0.38, y: height * 0.82))
+        path.closeSubpath()
+        return path
+    }
 }
 
 #if os(macOS)
