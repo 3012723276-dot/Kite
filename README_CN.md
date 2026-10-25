@@ -152,5 +152,3 @@ Kite 是从零编写的 Swift 实现，未复制以下项目的代码，但深�
 ## 协议与说明
 
 本项目以 [LGPL-3.0-only](LICENSE) 协议开源（随附 [GPL-3.0](COPYING) 文本）。仅供学习交流，音乐数据与版权归网易云音乐及各音源平台所有。不支持下载、无社交功能。
-
-> **出处说明：** 本项目是基于 missuo 的 [Kumone](https://github.com/missuo/kumone) 修改并更进而来，遵循 LGPL-3.0 协议；原始 LICENSE 与 COPYING 文件保持不变。
