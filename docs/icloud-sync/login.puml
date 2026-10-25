@@ -1,0 +1,100 @@
+@startuml login
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Login: Offer Publication, Import and Independent Sign-Out (current serial flow)
+
+actor "User" as User
+participant "SyncService" as Service
+participant "LoginSync" as Login
+participant "SyncRepository" as Repo
+participant "AccountStore" as Account
+participant "Temporary NeteaseClient" as Candidate
+participant "Local NeteaseClient" as Client
+
+== Refresh and publish offers ==
+opt login domain refresh requested
+  Service -> Login : read
+  Login -> Repo : readLoginKey
+  Repo --> Login : login-key.json (or none)
+  Login -> Login : when the key description changes, load the key from the local Keychain\ntreat a verifier mismatch as locked
+  Login -> Repo : read(.login)
+  Repo --> Login : valid device records / conflict versions\nsingle-device read errors logged and isolated
+  Login -> Login : cache records, observe counters\nupdate withdrawal duty when this device's record is read
+end
+Service -> Login : publish(enabled: loginEnabled at this moment)
+Login -> Account : check profile / authenticatedAccountID / hasAuthCookie
+alt sharing allowed, unlocked and account authenticated
+  Login -> Client : read authentication cookies
+  Login -> Login : unchanged content keeps the previous offer\notherwise seal cookies with AES-GCM → outgoingLogin
+else sharing off, locked, or no local cookie
+  Login -> Login : outgoingLogin = nil
+else cookie present but account not yet verified
+  Login --> Service : keep the existing offer; return other devices' accounts
+end
+opt outgoingLogin decided and content changed, or withdrawal still owed
+  Login -> Repo : write this device's login.json (payload or tombstone)
+  Repo --> Login : success
+  Login -> Login : update local cache and hasPublishedLogin
+end
+Login --> Service : latest valid offers from other devices (current key only) → logins
+
+== Set or enter the sync passphrase ==
+alt folder has no key, or the user resets it
+  User -> Service : createLoginKey(passphrase, confirmation)
+  Service -> Login : createKey
+  Login -> Login : PBKDF2 in the background; new salt and key ID
+  Login -> Repo : writeLoginKey
+else folder already has a key
+  User -> Service : unlockLogin(passphrase)
+  Service -> Login : unlock
+  Login -> Login : PBKDF2 in the background; compare verifier
+end
+Login -> Login : save the key to the local Keychain
+Service -> Service : await synchronizeNow (login)
+
+== User confirms import ==
+User -> Service : importLogin(record)
+Service -> Service : no concurrent imports; capture connection generation\nre-check the offer is still listed on this connection
+Service -> Login : open(login)
+Login --> Service : decrypted cookies (asks for the passphrase when locked)
+Service -> Account : importLogin(accountID, cookies, authorization)
+Account -> Account : check payload and current authorization\nrecord bootstrapGeneration / authenticationFingerprint
+Account -> Candidate : set candidate cookies; query the account online
+Candidate --> Account : verified profile
+Account -> Account : re-check account ID, authorization,\nbootstrap generation and original fingerprint
+Account -> Client : replaceAuthentication (applied after persisting)
+Account -> Account : bump authentication generation; suspend old playback\napply profile and local account snapshot
+Account --> Service : local credential import complete
+Service -> Service : re-check cancellation / connection / current account\nset loginEnabled = true and save
+Service -> Service : await synchronizeNow\nrefreshing: login / publishing: login + playback
+Service -> Account : await refreshLibrary()
+Account --> Service : library refresh finished
+Service --> User : whether the current account still matches\ndefer clears importingLogin
+note over Service,Account
+  The interaction still waits for the follow-up sync and library refresh;
+  it does not return as soon as the credentials are committed.
+  Cancellation or connection changes after the commit do not undo the imported credentials.
+end note
+
+== Local sign-out ==
+User -> Account : logout()
+Account -> Service : shouldRevokeLoginSession(current account ID)
+Service -> Login : isAccountSharedElsewhere(account ID, this device's ID)
+Login --> Service : whether another device's latest record still offers the account
+Service --> Account : revoke by default; keep only when sync and login sync are on\nand the account is offered elsewhere
+Account -> Client : clearAuthCookies (local)
+Account -> Account : bump bootstrap generation, clear local snapshot, apply signed-out state
+Account -> Service : profile change → merged login / playback publication request
+opt server session must be revoked
+  Account -> Candidate : request /logout with the cookies from before sign-out
+  Candidate --> Account : success or thrown error; never touches a newer local login
+end
+Service -> Login : publish → withdraw this device's offer
+note over Repo,Client
+  Cookies in the sync folder are sealed with a key derived from the sync passphrase;
+  the key lives only in each device's Keychain.
+  The server session is revoked by default and kept only while another device
+  still offers the account; the last device out revokes it.
+  With sync off, nothing is withdrawn from the cloud until it reconnects.
+end note
+@enduml
