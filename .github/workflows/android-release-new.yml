@@ -1,0 +1,90 @@
+name: Android APK Release
+
+# 上游 Yuxin-Qiao/kumone 安卓版（Compose + Rust 核心 UniFFI）的发布。
+# 只构建 android/ 目录，不动 iOS / macOS / README。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Android version, e.g. 0.1.0 (without android-v prefix)"
+        required: true
+        default: "0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: 15859902
+          accept-android-sdk-licenses: false
+          packages: ""
+
+      - name: Install Android SDK packages and NDK
+        run: bash android/scripts/ci/install-android-sdk.sh
+
+      - name: Setup Gradle 9.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Setup Android Rust target
+        run: rustup target add aarch64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo +stable install cargo-ndk --version 4.1.2 --locked
+
+      - name: Test shared Rust core
+        working-directory: android
+        run: cargo test -p kumone-core -p kumone-ffi --all-targets
+
+      - name: Generate Kotlin UniFFI bindings
+        working-directory: android
+        run: |
+          rm -rf app/build/generated/uniffi/kotlin
+          mkdir -p app/build/generated/uniffi/kotlin
+          cargo build -p kumone-ffi --release
+          cargo run -p uniffi-bindgen -- generate \
+            --library target/release/libkumone_ffi.so \
+            --language kotlin \
+            --out-dir app/build/generated/uniffi/kotlin \
+            --no-format
+
+      - name: Build arm64 Rust library for Android
+        working-directory: android
+        run: |
+          rm -rf app/build/generated/uniffi/jniLibs
+          cargo ndk -t arm64-v8a \
+            -o app/build/generated/uniffi/jniLibs \
+            build -p kumone-ffi --release
+          test -f app/build/generated/uniffi/jniLibs/arm64-v8a/libkumone_ffi.so
+
+      - name: Build Debug APK
+        run: |
+          gradle -p android :app:assembleDebug \
+            -PkumoneVersion="${{ inputs.version }}" \
+            -PkumoneVersionCode="${{ github.run_number }}"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APK=$(find android/app/build/outputs/apk/debug -name '*.apk' -type f -print -quit)
+          test -n "$APK"
+          ls -lh "$APK"
+          gh release create "android-v${{ inputs.version }}" "$APK" \
+            --title "Kite Android ${{ inputs.version }}" \
+            --notes "Kite Android ${{ inputs.version }} (upstream Android source, renamed to Kite)" \
+          || gh release upload "android-v${{ inputs.version }}" "$APK" --clobber
