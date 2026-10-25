@@ -21,6 +21,7 @@ import moe.kite.android.api.NeteaseApi
 import moe.kite.android.model.Album
 import moe.kite.android.model.Track
 import moe.kite.android.player.KitePlayer
+import moe.kite.android.player.UnblockService
 
 class MainActivity : ComponentActivity() {
     private lateinit var player: KitePlayer
@@ -45,6 +46,7 @@ class MainActivity : ComponentActivity() {
 fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
     val navController = rememberNavController()
     var currentTrack by remember { mutableStateOf<Track?>(null) }
+    var currentSource by remember { mutableStateOf<String?>(null) }
     var playing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val api = remember { NeteaseApi() }
@@ -55,7 +57,17 @@ fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
             if (url.isNotBlank()) {
                 player.play(track, url)
                 currentTrack = track
+                currentSource = null
                 playing = true
+            } else {
+                // 网易拒绝 → 第三方音源兜底（pyncmd / 酷狗 / 酷我），与 iOS 版同策略
+                val unblocked = withContext(Dispatchers.IO) { UnblockService.resolve(track) }
+                if (unblocked != null) {
+                    player.play(track, unblocked.url)
+                    currentTrack = track
+                    currentSource = unblocked.name
+                    playing = true
+                }
             }
         }
     }
@@ -67,7 +79,12 @@ fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
                 if (currentTrack != null) {
                     ListItem(
                         headlineContent = { Text(currentTrack!!.name) },
-                        supportingContent = { Text(currentTrack!!.artist) },
+                        supportingContent = {
+                            Text(
+                                if (currentSource != null) "${currentTrack!!.artist} · 第三方音源：$currentSource"
+                                else currentTrack!!.artist
+                            )
+                        },
                         modifier = Modifier.clickable { navController.navigate("player") },
                         trailingContent = {
                             TextButton(onClick = {
