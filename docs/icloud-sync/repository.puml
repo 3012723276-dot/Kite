@@ -1,0 +1,68 @@
+@startuml repository
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Repository: Reads, Caching, Writes and Error Boundaries
+
+participant "Domain caller" as Domain
+participant "SyncRepository actor" as Repo
+participant "NSFileCoordinator" as Coordinator
+database "Files / conflict versions" as File
+collections "decodedFiles\nkey = symlink-resolved path" as Cache
+
+== Read a domain's device records ==
+Domain -> Repo : read(domain, type, connectionID)
+Repo -> Repo : check connection generation and root availability
+Repo -> Coordinator : coordinated listing of UUID directories in Devices
+loop domain file and its unresolved conflict versions
+  Repo -> Coordinator : coordinated readVersions
+  Repo -> File : resourceValues (download status / identity / generation)
+  alt file not downloaded yet
+    Repo -> File : startDownloadingUbiquitousItem
+    Repo --> Domain : SyncError.downloading
+  else resource identity and generation both match, type matches
+    Cache --> Repo : reuse the validated SyncRecord
+  else no usable stamp, or stamp changed
+    Repo -> File : read Data
+    alt Data equals the cache and type matches
+      Repo -> Cache : update stamp, reuse the decoded record
+    else content changed or type differs
+      Repo -> Repo : JSONDecoder + schema check
+      Repo -> Cache : cache only successfully decoded content
+    end
+  end
+  Repo -> Repo : check the record belongs to the device; remember conflict versions read
+end
+Repo --> Domain : records (the domain decides how to merge / pick the latest)
+note over Repo,Domain
+  Login: a single device's failure is logged and other devices continue.
+  Playback / preferences: read failures are still thrown to the domain.
+  A failed read removes the cache entry; failures are never cached.
+end note
+
+== Write this device's record ==
+Domain -> Repo : write(record, domain / file)
+Repo -> Repo : check connection (domain entry point)\nencode with JSONEncoder
+Repo -> Coordinator : coordinated creation of the parent directory
+Repo -> Coordinator : coordinated write of the target file
+Repo -> Cache : invalidate the old entry
+Repo -> File : Data.write(.atomic)
+Repo -> File : query identity / generation
+Repo -> Cache : store current Data, stamp and known record
+loop only conflict versions observed by this domain's read
+  Repo -> File : mark resolved and remove
+  Repo -> Cache : drop the conflict's cache entry
+end
+Repo --> Domain : returns only when every step succeeded
+note over Repo,File
+  Current implementation: the resource query / conflict cleanup after the
+  atomic write can still throw. This diagram does not claim that
+  post-commit maintenance failures are handled separately.
+  Filling the cache on success avoids re-decoding JSON for our own folder
+  notifications; the notifications themselves still join request coalescing
+  and are not filtered out by this device's ID.
+end note
+
+== Disconnect ==
+Domain -> Repo : disconnect(old connectionID)
+Repo -> Repo : only if it matches the current repository connection:\nrelease scopedURL / remove presenter\nclear folder, cache, conflicts and playback store state
+@enduml
