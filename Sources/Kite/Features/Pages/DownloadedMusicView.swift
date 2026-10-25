@@ -3,6 +3,7 @@ import SwiftUI
 /// A music-library page, using the same rows and layout as Recents and Cloud.
 /// Only explicitly retained downloads belong here; automatic caches stay private.
 struct DownloadedMusicView: View {
+    @EnvironmentObject private var settings: SettingsManager
     var collectionID: String?
     @ObservedObject private var downloads = DownloadManager.shared
     private let player = PlayerService.shared
@@ -48,14 +49,14 @@ struct DownloadedMusicView: View {
         // Give the music page a surface so transparent scroll content cannot
         // show the previous list through a saved-collection page.
         .background(Platform.windowBackgroundColor)
-        .navigationTitle(collection?.name ?? String(localized: "已下载"))
+        .navigationTitle(collection?.name ?? AppLanguageBundle.localizedString("已下载"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(collectionID == nil ? .large : .inline)
         #endif
         .task { await downloads.start(); await downloads.refreshLibrary() }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(isSelecting ? String(localized: "完成") : String(localized: "选择")) {
+                Button(isSelecting ? AppLanguageBundle.localizedString("完成") : AppLanguageBundle.localizedString("选择")) {
                     selectedIDs = []
                     isSelecting.toggle()
                 }
@@ -88,7 +89,7 @@ struct DownloadedMusicView: View {
             Spacer(minLength: 8)
             let ids = Set(tracks.map(\.id))
             let allSelected = !ids.isEmpty && ids.isSubset(of: selectedIDs)
-            Button(allSelected ? String(localized: "取消全选") : String(localized: "全选")) {
+            Button(allSelected ? AppLanguageBundle.localizedString("取消全选") : AppLanguageBundle.localizedString("全选")) {
                 selectedIDs = allSelected ? [] : ids
             }
             .keyboardShortcut("a", modifiers: .command)
@@ -119,7 +120,7 @@ struct DownloadedMusicView: View {
             guard downloads.accountScope == scope else { return }
             selectedIDs.subtract(ids)
             pendingRemoval = []
-            if !succeeded { ToastCenter.shared.show(String(localized: "部分下载未能移除，请重试")) }
+            if !succeeded { ToastCenter.shared.show(AppLanguageBundle.localizedString("部分下载未能移除，请重试")) }
         }
     }
 
@@ -201,6 +202,7 @@ struct DownloadedMusicView: View {
 
 /// Secondary download controls follow the music pages' spacing and row styling.
 struct DownloadTasksView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @ObservedObject private var downloads = DownloadManager.shared
     @State private var confirmCancelAll = false
 
@@ -263,7 +265,7 @@ struct DownloadTasksView: View {
                 PlayerClearanceSpacer()
             }
         }
-        .navigationTitle("下载任务")
+        .navigationTitle(AppLanguageBundle.localizedString("下载任务"))
         .task { await downloads.start() }
         .alert("取消未完成的下载？", isPresented: $confirmCancelAll) {
             Button("取消下载", role: .destructive) {
@@ -326,7 +328,7 @@ private struct DownloadTaskRow: View {
                         .tint(Theme.accent).controlSize(.small)
                 }
                 HStack {
-                    Text(job.errorMessage ?? (waitsForWiFi ? String(localized: "等待 Wi-Fi") : job.status.label))
+                    Text(job.errorMessage ?? (waitsForWiFi ? AppLanguageBundle.localizedString("等待 Wi-Fi") : job.status.label))
                     Spacer(minLength: 8)
                     if expected > 0 {
                         Text("\(ByteCountFormatter.string(fromByteCount: received, countStyle: .file)) / \(ByteCountFormatter.string(fromByteCount: expected, countStyle: .file))")
@@ -436,10 +438,10 @@ struct DownloadCollectionButton: View {
         !tracks.isEmpty && Set(tracks.map(\.id)).count == downloadedIDs.count
     }
     private var removalTitle: String {
-        owner.hasPrefix("album:") ? String(localized: "要移除此专辑的所有下载吗？") : String(localized: "要移除此歌单的所有下载吗？")
+        owner.hasPrefix("album:") ? AppLanguageBundle.localizedString("要移除此专辑的所有下载吗？") : AppLanguageBundle.localizedString("要移除此歌单的所有下载吗？")
     }
     private var removalAction: String {
-        owner.hasPrefix("album:") ? String(localized: "移除专辑下载") : String(localized: "移除歌单下载")
+        owner.hasPrefix("album:") ? AppLanguageBundle.localizedString("移除专辑下载") : AppLanguageBundle.localizedString("移除歌单下载")
     }
     private var isActive: Bool { collectionJobs.contains { $0.status.isInProgress } }
     private var canResume: Bool { collectionJobs.contains { $0.status.canResume && $0.status != .waitingNetwork } }
@@ -454,10 +456,10 @@ struct DownloadCollectionButton: View {
         return total > 0 ? total / Double(ids.count) : nil
     }
     private var title: String {
-        if isActive || isSubmitting { return String(localized: "停止下载") }
-        if canResume { return String(localized: "继续下载") }
+        if isActive || isSubmitting { return AppLanguageBundle.localizedString("停止下载") }
+        if canResume { return AppLanguageBundle.localizedString("继续下载") }
         if isComplete { return removalAction }
-        return String(localized: "下载全部")
+        return AppLanguageBundle.localizedString("下载全部")
     }
 
     var body: some View {
@@ -563,7 +565,7 @@ struct DownloadCollectionButton: View {
             let succeeded = await downloads.deleteLocalAudio(trackIDs: ids)
             guard downloads.accountScope == scope else { return }
             pendingRemoval = []
-            if !succeeded { ToastCenter.shared.show(String(localized: "部分下载未能移除，请重试")) }
+            if !succeeded { ToastCenter.shared.show(AppLanguageBundle.localizedString("部分下载未能移除，请重试")) }
         }
     }
 }
