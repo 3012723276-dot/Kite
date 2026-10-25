@@ -433,7 +433,13 @@ final class SettingsManager: ObservableObject {
 /// language). The choice is read straight from UserDefaults here so the
 /// redirect is safe from any thread; the swizzle itself installs once.
 enum AppLanguageBundle {
-    static let install: Void = {
+    /// Installs the redirect exactly once: touching `token` runs its lazy
+    /// initializer a single time, thread-safely, and later calls are no-ops.
+    static func install() {
+        _ = token
+    }
+
+    private static let token: Void = {
         guard
             let original = class_getInstanceMethod(
                 Bundle.self, #selector(Bundle.localizedString(forKey:value:table:))),
@@ -450,7 +456,9 @@ extension Bundle {
         // original implementation — both in the redirect below (the language
         // bundle is not .main) and in the fallthrough.
         if self === Bundle.main,
-           let code = UserDefaults.standard.string(forKey: SettingsManager.Keys.language),
+           // Same key as SettingsManager.Keys.language, spelled out here so
+           // this nonisolated method never depends on the @MainActor type.
+           let code = UserDefaults.standard.string(forKey: "settings.appLanguage"),
            let path = Bundle.main.path(forResource: code, ofType: "lproj"),
            let languageBundle = Bundle(path: path) {
             return languageBundle.kite_localizedString(forKey: key, value: value, table: tableName)
