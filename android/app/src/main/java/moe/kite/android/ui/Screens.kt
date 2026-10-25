@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,7 @@ import moe.kite.android.model.Track
 import moe.kite.android.player.KitePlayer
 
 /** 歌单详情：点歌单进列表，点歌播放并进队列。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistDetailScreen(
     api: NeteaseApi,
@@ -57,6 +59,7 @@ fun PlaylistDetailScreen(
 }
 
 /** 播放页：封面占位、歌词、进度、上一首 / 下一首。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     api: NeteaseApi,

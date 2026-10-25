@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
     val navController = rememberNavController()
@@ -153,6 +155,7 @@ fun KiteApp(player: KitePlayer, onDestroyPlayer: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(api: NeteaseApi, onPlaylistClick: (Long) -> Unit) {
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
@@ -205,6 +208,7 @@ fun HomeScreen(api: NeteaseApi, onPlaylistClick: (Long) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(api: NeteaseApi, onPlay: (Track) -> Unit) {
     var keyword by remember { mutableStateOf("") }
@@ -245,6 +249,7 @@ fun SearchScreen(api: NeteaseApi, onPlay: (Track) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(api: NeteaseApi) {
     var phone by remember { mutableStateOf("") }

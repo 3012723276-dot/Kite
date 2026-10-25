@@ -33,6 +33,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+        // 兜底：全局允许 Material3 实验 API，
+        // 这样 TopAppBar / ListItem 就算漏写 @OptIn 也不会再编译失败（#6 的根因）。
+        freeCompilerArgs += "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
     }
     buildFeatures {
         compose = true
