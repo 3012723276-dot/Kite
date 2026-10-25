@@ -25,6 +25,7 @@ struct SyncSettingsSection: View {
                         }
                     }
                 ))
+                .tint(.green)
                 Text("在设备间接续播放，同步设置")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -41,6 +42,7 @@ struct SyncSettingsSection: View {
                         }
                     }
                 ))
+                .tint(.green)
 
                 Text("允许已连接的设备登录此账号，登录信息以同步密码加密")
                     .font(.caption)
