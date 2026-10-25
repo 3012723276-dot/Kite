@@ -33,7 +33,11 @@ Built with SwiftUI · Talks directly to NetEase's real API · Sparkle auto-updat
 
 ## About the Name
 
-**Kite** comes from the Japanese **雲の音** (*kumo no ne*, "the sound of clouds"), contracted into one word — **雲音** (くもね, *Kite*). It is a nod to the "cloud" in NetEase **Cloud** Music: the music drifting down to you from the cloud.
+**Kite** is a creature that rides the wind. In ancient times, people flew paper kites in the open fields and watched them rise upon the whirlwind, as if to break free from every fetter — yet held always by a single thread, never lost beyond the sky. Freedom, it turns out, is not a line cut loose, but a heart that remains tethered, and still dares to journey far.
+
+The name Kite comes from this. Music itself is like the wind: without form or substance, yet able to lift the human heart. I hope this software may be such a kite, carrying the sound from the clouds into the sky inside every heart. It is the way of life I long for most: not trapped in one corner, but traveling with the wind, and always remembering where it first took flight.
+
+When the wind rises, the kite flies; when the heart stirs, the music begins.
 
 ## Features
 
