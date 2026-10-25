@@ -3,13 +3,18 @@ name: iOS Test IPA Build
 # TEMPORARY test-only workflow on test/beta3.
 # It builds an unsigned IPA and uploads it as a workflow artifact.
 # It deliberately does NOT create a GitHub release, tag, or touch main.
+# NOTE (test/beta3 only): a push trigger limited to test/beta3 was added
+# because the GitHub web UI cannot dispatch workflow_dispatch for a workflow
+# that exists only on a non-default branch.
 on:
+  push:
+    branches: [test/beta3]
   workflow_dispatch:
     inputs:
       version:
         description: "Test version, e.g. 0.1.5 (without the leading v)"
         required: true
-        default: "0.1.5"
+        default: "0.1.5-beta3"
 
 permissions:
   contents: read
@@ -24,7 +29,7 @@ jobs:
 
       - name: Derive version
         run: |
-          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          echo "VERSION=${{ inputs.version || '0.1.5-beta3' }}" >> "$GITHUB_ENV"
           echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
 
       - name: Build unsigned iOS app
