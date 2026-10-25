@@ -646,14 +646,14 @@ struct IOSLibraryView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: 32))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("登录网易云音乐")
                                     .font(.headline)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
                                 Text("同步我喜欢的音乐、歌单与每日推荐")
                                     .font(.caption)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
                             }
                         }
                         .padding(.vertical, 6)
@@ -685,7 +685,7 @@ struct IOSLibraryView: View {
                             Text("每日推荐")
                         } icon: {
                             Image(systemName: "calendar")
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                         }
                     }
                     NavigationLink(value: Destination.recents) {
@@ -693,7 +693,7 @@ struct IOSLibraryView: View {
                             Text("最近播放")
                         } icon: {
                             Image(systemName: "clock.fill")
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                         }
                     }
                     NavigationLink(value: Destination.collections) {
@@ -701,7 +701,7 @@ struct IOSLibraryView: View {
                             Text("我的收藏")
                         } icon: {
                             Image(systemName: "star.fill")
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                         }
                     }
                     NavigationLink(value: Destination.cloud) {
@@ -709,7 +709,7 @@ struct IOSLibraryView: View {
                             Text("音乐云盘")
                         } icon: {
                             Image(systemName: "icloud.fill")
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                         }
                     }
                 }
@@ -783,7 +783,7 @@ struct IOSLibraryView: View {
                 } label: {
                     Image(systemName: "gearshape")
                 }
-                .tint(.white)
+                .tint(.primary)
                 .accessibilityLabel("设置")
             }
         }
