@@ -11,6 +11,14 @@ enum Theme {
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 
+    /// Blue used for the update sheet (beta3): the sheet's red accent
+    /// (icon, install button, download text, progress ring) is blue there.
+    static let updateBlue = Color.blue
+    static let updateBlueGradient = LinearGradient(
+        colors: [Color(red: 0.35, green: 0.62, blue: 1.0), Color.blue],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
     enum Radius {
         static let badge: CGFloat = 4
         static let small: CGFloat = 6
