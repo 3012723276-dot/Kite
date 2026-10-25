@@ -209,7 +209,7 @@ struct IOSUpdaterSheet: View {
 
             case .available(let release):
                 Image(systemName: "arrow.down.circle.fill")
-                    .font(.system(size: 44)).foregroundStyle(Theme.accent)
+                    .font(.system(size: 44)).foregroundStyle(Theme.updateBlue)
                 VStack(spacing: 4) {
                     Text("发现新版本 \(release.version)").font(.headline)
                     Text("当前版本 \(ReleaseChecker.currentVersion)")
@@ -222,7 +222,7 @@ struct IOSUpdaterSheet: View {
                 Button("下载 IPA 手动侧载") { updater.download(release) }
                     .buttonStyle(.plain)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(Theme.updateBlue)
                 laterButton
 
             case .downloading(let progress):
@@ -232,7 +232,7 @@ struct IOSUpdaterSheet: View {
 
             case .readyToInstall(let url):
                 Image(systemName: "square.and.arrow.down.fill")
-                    .font(.system(size: 40)).foregroundStyle(Theme.accent)
+                    .font(.system(size: 40)).foregroundStyle(Theme.updateBlue)
                 Text("下载完成").font(.headline)
                 Text("已保存到「文件」App ▸ 我的 iPhone ▸ Kite。用下方按钮直接导入签名工具（全能签 / ESign 等），或在「文件」里手动打开。")
                     .font(.caption).foregroundStyle(.secondary)
@@ -268,7 +268,7 @@ struct IOSUpdaterSheet: View {
             Text(title)
                 .font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(.vertical, 12)
-                .background(Theme.accentGradient, in: Capsule())
+                .background(Theme.updateBlueGradient, in: Capsule())
         }
         .buttonStyle(.pressable)
     }
@@ -296,7 +296,7 @@ struct ProgressRing: View {
                 .stroke(.primary.opacity(0.12), lineWidth: 8)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(Theme.accentGradient,
+                .stroke(Theme.updateBlueGradient,
                         style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.easeInOut(duration: 0.2), value: progress)
