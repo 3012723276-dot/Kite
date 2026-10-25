@@ -240,9 +240,9 @@ struct SettingsView: View {
 
             Section("联系我们") {
                 // No leading icons in this section. The three link rows are
-                // plain-style buttons so they render in the same primary /
-                // secondary colors as the WeChat row below, instead of the
-                // app's red accent color that a default Button would use.
+                // plain-style buttons so they render in primary /
+                // secondary colors instead of the app's red accent color
+                // that a default Button would use.
                 // Every row also has a long-press menu that copies the
                 // contact value on the right; tapping the first three rows
                 // still opens their link / mail app.
@@ -306,17 +306,6 @@ struct SettingsView: View {
                 .contextMenu {
                     Button("复制") {
                         Platform.copyToPasteboard(string: "3012723276@qq.com")
-                    }
-                }
-                HStack {
-                    Text("WeChat")
-                    Spacer()
-                    Text("Kite_090127")
-                        .foregroundStyle(.secondary)
-                }
-                .contextMenu {
-                    Button("复制") {
-                        Platform.copyToPasteboard(string: "Kite_090127")
                     }
                 }
             }
