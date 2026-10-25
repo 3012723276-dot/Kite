@@ -49,8 +49,10 @@ struct SettingsView: View {
                 Picker("音质", selection: $settings.audioQuality) {
                     ForEach(AudioQuality.allCases) { quality in
                         Text(quality.displayName).tag(quality)
+                            .foregroundStyle(quality == settings.audioQuality ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 Text("无损与 Hi-Res 需要黑胶 VIP，未开通时自动回落到可用音质")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -96,8 +98,10 @@ struct SettingsView: View {
                 Picker("主题", selection: $settings.appearance) {
                     ForEach(AppAppearance.allCases) { appearance in
                         Text(appearance.displayName).tag(appearance)
+                            .foregroundStyle(appearance == settings.appearance ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 #if os(macOS)
                 // macOS only renders two now-playing layouts — 黑胶 and the
                 // regular page; the iOS 沉浸/简洁 options all fall back to the
@@ -109,14 +113,19 @@ struct SettingsView: View {
                     set: { settings.nowPlayingMode = $0 }
                 )) {
                     Text(NowPlayingMode.vinyl.displayName).tag(NowPlayingMode.vinyl)
+                        .foregroundStyle(settings.nowPlayingMode == .vinyl ? .primary : .secondary)
                     Text(NowPlayingMode.classic.displayName).tag(NowPlayingMode.classic)
+                        .foregroundStyle(settings.nowPlayingMode == .vinyl ? .secondary : .primary)
                 }
+                .tint(.secondary)
                 #else
                 Picker("播放页模式", selection: $settings.nowPlayingMode) {
                     ForEach(NowPlayingMode.allCases) { mode in
                         Text(mode.displayName).tag(mode)
+                            .foregroundStyle(mode == settings.nowPlayingMode ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 #endif
                 // Language row (beta2): sits between the player-page mode
                 // picker and the lyrics-translation toggle. The trailing
@@ -130,8 +139,10 @@ struct SettingsView: View {
                 )) {
                     ForEach(settings.orderedAppLanguages) { language in
                         Text(verbatim: language.nativeName).tag(language)
+                            .foregroundStyle(language == settings.effectiveAppLanguage ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 Toggle("显示歌词翻译", isOn: $settings.showLyricsTranslation)
                     .tint(.green)
                 Toggle("逐字歌词（卡拉OK）", isOn: $settings.verbatimLyrics)
@@ -139,8 +150,10 @@ struct SettingsView: View {
                 Picker("日文歌词读音", selection: $settings.lyricsAnnotation) {
                     ForEach(LyricsAnnotation.allCases) { annotation in
                         Text(annotation.displayName).tag(annotation)
+                            .foregroundStyle(annotation == settings.lyricsAnnotation ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 Text("罗马音在歌词上方另起一行，汉字读音把假名标在汉字正上方；缺少官方罗马音时自动生成读音")
                     .font(.caption)
                     .foregroundStyle(.secondary)
