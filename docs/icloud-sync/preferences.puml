@@ -1,0 +1,57 @@
+@startuml preferences
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+title Preferences: Local Edit Capture, Per-Field Merge and Echo Suppression
+
+participant "SyncService" as Service
+participant "PreferencesSync" as Pref
+participant "SettingsManager" as Settings
+participant "SyncRevisionClock" as Clock
+database "Local UserDefaults\nsync.preferences / sync.counter" as Local
+participant "SyncRepository" as Repo
+
+Service -> Pref : synchronize(reading: refreshRequested)
+Pref -> Clock : observe local field revisions
+Pref -> Settings : current syncPreferences
+Pref -> Pref : compare with lastObservedValues\nnew revisions only for fields changed locally
+Pref -> Clock : nextRevision (when there are edits)
+Pref -> Local : save only if local content changed; commit counter
+note over Pref,Local : local intent is saved before waiting on cloud I/O
+
+opt explicit refresh or needsInitialRead
+  Pref -> Repo : read(.preferences)
+  Repo --> Pref : device records + conflict versions
+  Pref -> Pref : check cancellation
+  Pref -> Clock : observe the highest record and field counters
+  Pref -> Settings : current settings again
+  Pref -> Pref : capture local edits made during I/O again\nallocate revisions after the observed remote counters
+  Pref -> Pref : mergedPreferences.merge(incoming)\ncompare SyncRevision per field
+  Pref -> Settings : validate known fields as a whole, then apply changes
+  Pref -> Pref : update mergedPreferences\nlastObservedValues = settings actually applied\nrestore this device's published baseline; needsInitialRead = false
+  note over Pref,Settings
+    Applying remote values may fire the settings subscription,
+    but with the baseline updated, the next round does not treat it as a local edit.
+  end note
+end
+
+Pref -> Pref : fill in local values only for fields missing from the merge\nnew-device defaults never overwrite existing remote fields
+Pref -> Local : save the local merged copy only on change; commit counter
+alt mergedPreferences != lastPublishedPreferences
+  Pref -> Clock : makeRecord (increment and persist counter)
+  Pref -> Repo : write(.preferences)
+  Repo --> Pref : success
+  Pref -> Pref : after checking cancellation, update lastPublishedPreferences
+else nothing new
+  note over Pref,Repo : publication skipped
+end
+
+note over Pref,Local
+  mergedPreferences: the domain's truth (values + revisions)
+  lastObservedValues: baseline for recognizing local edits
+  persistedPreferences: local persistence baseline
+  lastPublishedPreferences: this connection's publication baseline
+
+  Disconnecting resets only the publication baseline and first-read flag;
+  the local copy for restoring edits is kept.
+end note
+@enduml
