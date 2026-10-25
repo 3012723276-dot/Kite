@@ -12,21 +12,21 @@ enum AudioQuality: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .standard: return String(localized: "标准")
-        case .higher: return String(localized: "较高")
-        case .exhigh: return String(localized: "极高")
-        case .lossless: return String(localized: "无损")
+        case .standard: return AppLanguageBundle.localizedString("标准")
+        case .higher: return AppLanguageBundle.localizedString("较高")
+        case .exhigh: return AppLanguageBundle.localizedString("极高")
+        case .lossless: return AppLanguageBundle.localizedString("无损")
         case .hires: return "Hi-Res"
         }
     }
 
     var badge: String {
         switch self {
-        case .standard: return String(localized: "标准")
-        case .higher: return String(localized: "较高")
-        case .exhigh: return String(localized: "极高")
-        case .lossless: return String(localized: "无损")
-        case .hires: return String(localized: "高解析")
+        case .standard: return AppLanguageBundle.localizedString("标准")
+        case .higher: return AppLanguageBundle.localizedString("较高")
+        case .exhigh: return AppLanguageBundle.localizedString("极高")
+        case .lossless: return AppLanguageBundle.localizedString("无损")
+        case .hires: return AppLanguageBundle.localizedString("高解析")
         }
     }
 }
@@ -38,9 +38,9 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .auto: return String(localized: "跟随系统")
-        case .light: return String(localized: "浅色")
-        case .dark: return String(localized: "深色")
+        case .auto: return AppLanguageBundle.localizedString("跟随系统")
+        case .light: return AppLanguageBundle.localizedString("浅色")
+        case .dark: return AppLanguageBundle.localizedString("深色")
         }
     }
 
@@ -90,9 +90,9 @@ enum LyricsAnnotation: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .off: return String(localized: "关闭")
-        case .romaji: return String(localized: "罗马音")
-        case .furigana: return String(localized: "汉字读音")
+        case .off: return AppLanguageBundle.localizedString("关闭")
+        case .romaji: return AppLanguageBundle.localizedString("罗马音")
+        case .furigana: return AppLanguageBundle.localizedString("汉字读音")
         }
     }
 }
@@ -107,10 +107,10 @@ public enum NowPlayingMode: String, CaseIterable, Identifiable {
 
     public var displayName: String {
         switch self {
-        case .vinyl: return String(localized: "黑胶模式")
-        case .classic: return String(localized: "经典模式")
-        case .immersive: return String(localized: "沉浸模式")
-        case .minimal: return String(localized: "简洁模式")
+        case .vinyl: return AppLanguageBundle.localizedString("黑胶模式")
+        case .classic: return AppLanguageBundle.localizedString("经典模式")
+        case .immersive: return AppLanguageBundle.localizedString("沉浸模式")
+        case .minimal: return AppLanguageBundle.localizedString("简洁模式")
         }
     }
 }
@@ -437,6 +437,22 @@ enum AppLanguageBundle {
     /// initializer a single time, thread-safely, and later calls are no-ops.
     static func install() {
         _ = token
+    }
+
+    /// Looks a key up in the language the user picked in Settings, not the
+    /// system language. This is what the option names (quality, theme,
+    /// player mode, lyrics reading, audio source) must use: plain
+    /// `String(localized:)` resolves against the system language and ignores
+    /// the in-app choice, which is why those values stayed Chinese in the
+    /// English UI. When no language is picked, falls back to the system
+    /// lookup (which the swizzle above also redirects, if installed).
+    static func localizedString(_ key: String) -> String {
+        if let code = UserDefaults.standard.string(forKey: "settings.appLanguage"),
+           let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: key, table: "Localizable")
+        }
+        return NSLocalizedString(key, tableName: "Localizable", bundle: .main, value: key, comment: "")
     }
 
     private static let token: Void = {
