@@ -644,11 +644,11 @@ struct IOSLibraryView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: 32))
-                                .foregroundStyle(Theme.accent)
+                                .foregroundStyle(.blue)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("登录网易云音乐")
                                     .font(.headline)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(.blue)
                                 Text("同步我喜欢的音乐、歌单与每日推荐")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
@@ -656,6 +656,7 @@ struct IOSLibraryView: View {
                         }
                         .padding(.vertical, 6)
                     }
+                    .tint(.blue)
                 }
             }
 
@@ -663,6 +664,7 @@ struct IOSLibraryView: View {
                 NavigationLink(value: Destination.downloaded) {
                     Label("已下载", systemImage: "arrow.down.circle.fill")
                 }
+                .tint(.blue)
             }
 
             if account.hasAuthCookie {
@@ -670,7 +672,7 @@ struct IOSLibraryView: View {
                     if let liked = account.likedSongsPlaylist {
                         NavigationLink(value: Destination.playlist(liked.id)) {
                             Label("我喜欢的音乐", systemImage: "heart.fill")
-                                .foregroundStyle(Theme.accent)
+                                .foregroundStyle(.blue)
                         }
                     }
                     NavigationLink(value: Destination.daily) {
@@ -756,6 +758,7 @@ struct IOSLibraryView: View {
                 } label: {
                     Image(systemName: "gearshape")
                 }
+                .tint(.blue)
                 .accessibilityLabel("设置")
             }
         }
