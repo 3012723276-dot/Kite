@@ -68,6 +68,7 @@ struct StorageSpaceView: View {
                     Text("8 GB").tag(Int64(8) << 30)
                     Text("不限").tag(Int64(0))
                 }
+                .tint(.secondary)
                 #else
                 Toggle("歌曲缓存", isOn: $settings.enableAudioCache)
                     .tint(.green)
@@ -82,6 +83,7 @@ struct StorageSpaceView: View {
                             Text(format(Int64(megabytes) * 1_000_000)).tag(megabytes)
                         }
                     }
+                    .tint(.secondary)
                 }
                 #endif
                 Button(role: .destructive) { Task { await model.clear(.musicCache) } } label: {
