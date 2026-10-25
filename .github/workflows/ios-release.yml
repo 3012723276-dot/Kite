@@ -55,6 +55,12 @@ jobs:
             MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             build
 
+      - name: Copy localization tables into app
+        run: |
+          cp -R Sources/Kite/Resources/*.lproj \
+            "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app/"
+          ls "$RUNNER_TEMP/ios-dd/Build/Products/Release-iphoneos/KiteIOS.app/" | grep lproj
+
       - name: Package IPA
         run: |
           mkdir -p dist "$RUNNER_TEMP/payload/Payload"
