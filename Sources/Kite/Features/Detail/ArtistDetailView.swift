@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ArtistDetailView: View {
+    @EnvironmentObject private var settings: SettingsManager
     let artistID: Int
 
     @State private var artist: ArtistSummary?
@@ -109,7 +110,7 @@ struct ArtistDetailView: View {
             }
         }
         #if os(macOS)
-        .navigationTitle(artist?.name ?? String(localized: "歌手"))
+        .navigationTitle(artist?.name ?? AppLanguageBundle.localizedString("歌手"))
         #else
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -248,7 +249,7 @@ struct ArtistDetailView: View {
                         Button {
                             toggleFollow()
                         } label: {
-                            Label(isFollowed ? String(localized: "已关注") : String(localized: "关注"),
+                            Label(isFollowed ? AppLanguageBundle.localizedString("已关注") : AppLanguageBundle.localizedString("关注"),
                                   systemImage: isFollowed ? "checkmark" : "plus")
                                 .font(.system(size: 13, weight: .medium))
                                 .padding(.horizontal, 14)
@@ -279,7 +280,7 @@ struct ArtistDetailView: View {
             do {
                 try await NeteaseAPI.subscribeArtist(id: artistID, subscribe: !isFollowed)
                 isFollowed.toggle()
-                ToastCenter.shared.show(isFollowed ? String(localized: "已关注歌手") : String(localized: "已取消关注"))
+                ToastCenter.shared.show(isFollowed ? AppLanguageBundle.localizedString("已关注歌手") : AppLanguageBundle.localizedString("已取消关注"))
             } catch {
                 ToastCenter.shared.show(error.localizedDescription)
             }
