@@ -26,9 +26,10 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
+      # 注意：不要再用 android-actions/setup-android@v3，
+      # 它在新版 ubuntu runner 上会因为找不到 'tools' 包而 sdkmanager 退出 1，
+      # 这就是 Android #1 失败的原因。ubuntu-latest 自带 Android SDK，
+      # Gradle 直接用 runner 预装的 ANDROID_HOME 即可。
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
