@@ -236,6 +236,7 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .tint(.secondary)
                 .contextMenu {
                     Button("复制") {
                         Platform.copyToPasteboard(string: "t.me/Kite_090127")
@@ -254,6 +255,7 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .tint(.secondary)
                 .contextMenu {
                     Button("复制") {
                         Platform.copyToPasteboard(string: "x.com/kite_090127")
@@ -272,6 +274,12 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                // The email address is data-detected as a link by the system
+                // and a link's color comes from tint, not from the Text's
+                // foregroundStyle — that is why this value stayed red in
+                // beta3 while the other rows turned gray. Pin the tint to
+                // secondary so the detected link matches the other rows.
+                .tint(.secondary)
                 .contextMenu {
                     Button("复制") {
                         Platform.copyToPasteboard(string: "3012723276@qq.com")
