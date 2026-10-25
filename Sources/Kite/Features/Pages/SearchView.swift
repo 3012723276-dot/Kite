@@ -81,6 +81,9 @@ struct SearchView: View {
         // toolbar search field is unavailable. On macOS, MainWindow owns the
         // only search field and navigates here with its submitted query.
         .searchable(text: $searchText, prompt: "搜索歌曲、歌手、专辑、歌单")
+        // beta4: the blinking input caret follows tint; it was red (the app
+        // accent) — make it blue like the other beta4 accents.
+        .tint(.blue)
         .onSubmit(of: .search) {
             model.setQuery(searchText)
             Task { await model.load(tab: model.tab) }
