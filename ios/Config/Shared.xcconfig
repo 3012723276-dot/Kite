@@ -7,7 +7,7 @@
 // Project Identity
 // ==========================================
 PRODUCT_NAME = KiteIOS
-PRODUCT_BUNDLE_IDENTIFIER = sb.moe.Kite
+PRODUCT_BUNDLE_IDENTIFIER = sb.moe.kite
 // PRODUCT_DISPLAY_NAME is not a real build setting; the Home Screen
 // name comes from CFBundleDisplayName.
 INFOPLIST_KEY_CFBundleDisplayName = Kite
