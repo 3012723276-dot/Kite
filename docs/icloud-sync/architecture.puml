@@ -1,0 +1,81 @@
+@startuml architecture
+!pragma layout smetana
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam componentStyle rectangle
+title Sync Architecture and State Ownership
+
+package "UI / scene lifecycle" {
+  component "Sync settings / sign-in buttons\ncontinue banner / queue entry" as UI
+  component "PlaybackLifecycle\nscene changes / launch" as Life
+}
+
+package "MainActor" {
+  component "SyncService\nconnection and request orchestration\npublished lists / errors / operation state" as Service
+  component "PreferencesSync\nedit capture / merge / restore baseline" as Pref
+  component "LoginSync\ndevice offers / publish / withdrawal duty\nlogin key" as Login
+  component "SyncRevisionClock\nshared counter / revision allocation" as Clock
+  component "SettingsManager\nprojection of syncable settings" as Settings
+  component "AccountStore\naccount verification / credential import" as Account
+  component "PlayerService (Mac / iOS)\nlocal queue / playback / progress" as Player
+}
+
+package "SyncRepository actor isolation" {
+  component "SyncRepository\nauthorization / file coordination / versions / decode cache" as Repo
+  component "PlaybackSyncStore (struct)\npointer and snapshot / on-demand reads / queue maintenance" as Playback
+}
+
+database "Keychain\npersistent deviceID\nlogin key (not synced)" as Keychain
+database "Local auth file\nwritten atomically by NeteaseClient" as AuthFile
+database "UserDefaults\ntoggles / bookmark / identity token\nlogical clock / local preference restore" as Defaults
+folder "Authorized folder or iCloud container\nKite/Devices/<deviceID>/\nKite/login-key.json" as Files
+component "File system / File Provider\nNSFilePresenter notifications" as Provider
+component "PlaybackStateStorage\nown utility serial queue\n150 ms batching / flush" as Local
+database "Local player-state.json" as LocalFile
+
+UI --> Service : toggles / import / continue
+Life --> Service : start / setForeground
+Life --> Player : checkpointPlayback
+Service --> Pref
+Service --> Login
+Service --> Clock
+Service --> Repo : await (bound to connection generation)
+Service --> Player : resume after on-demand load succeeds
+Player --> Service : targeted discrete state subscriptions
+Account --> Service : profile / isBootstrapped
+Settings --> Service : syncPreferenceChanges
+Pref --> Settings : read projection / apply merge result
+Pref --> Clock
+Login --> Clock
+Pref --> Repo : read / write preferences
+Login --> Repo : read / write login and login key
+Login --> Account : check current authentication
+Login --> Keychain : load / save login key
+Service --> Account : import login / refresh library
+Repo *-- Playback : runs under the same actor isolation
+Repo --> Files : NSFileCoordinator / atomic replace
+Provider --> Repo : folder observation
+Repo ..> Service : path notification → domain refresh request
+Files .. Provider : asynchronous system propagation
+Service --> Keychain : load device identity
+Account --> AuthFile : commit authentication via NeteaseClient
+Service --> Defaults
+Pref --> Defaults
+Clock --> Defaults
+Player --> Local : local snapshot
+Local --> LocalFile
+
+note bottom of Local
+  Local restore is independent of the cloud connection.
+  Turning sync off or losing the folder never stops local saves.
+end note
+note bottom of Service
+  One pendingSyncRequest
+  At most one coalescingTask, syncTask, periodicRefreshTask
+  connectionID fences off old tasks; it is not the persistent deviceID.
+end note
+note bottom of Files
+  Each device writes only its own directory; no cross-device transactions.
+  Weakly consistent and eventually convergent; no real-time propagation.
+end note
+@enduml
