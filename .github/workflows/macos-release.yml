@@ -1,0 +1,73 @@
+name: macOS Release
+
+# Only builds and publishes the macOS app as an unsigned zip.
+# No Developer ID signing, no notarization, no Sparkle appcast, no Homebrew
+# — so it needs no secrets. The .app is ad-hoc signed by build-app.sh itself.
+# Users open it the first time with right-click -> Open, because it is
+# not notarized.
+#
+# Manual trigger only (no tag trigger): this is deliberate, so creating
+# the v0.1.0 release for iOS does not re-trigger this workflow, and so
+# this workflow can upload into the release the iOS workflow created
+# instead of racing it to create the same release.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.1.0 (without the leading v)"
+        required: true
+        default: "0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: build number = commit count
+
+      - name: Derive version
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+          echo "Releasing macOS $VERSION (build $(git rev-list --count HEAD))"
+
+      - name: Release notes
+        run: |
+          if Scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md" 2>/dev/null; then
+            echo "Using CHANGELOG section for $VERSION"
+          else
+            printf 'Kite macOS %s\n\nUnsigned macOS app (macOS 15+). Unzip, drag to Applications, and on first launch use right-click -> Open because it is not notarized.\n' "$VERSION" > "$RUNNER_TEMP/notes.md"
+          fi
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Build app (universal)
+        run: |
+          MARKETING_VERSION="$VERSION" BUILD_NUMBER="$BUILD_NUMBER" \
+            ARCHES="arm64 x86_64" FETCH_MLX_METALLIB=1 \
+            Scripts/build-app.sh release
+
+      - name: Package zip
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent ".build/app/Kite.app" "dist/Kite-$VERSION.zip"
+          ls -lh dist/
+
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Upload into the existing release if the iOS workflow already
+          # created it; otherwise create the release with this zip.
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release upload "v$VERSION" "dist/Kite-$VERSION.zip" --clobber
+          else
+            gh release create "v$VERSION" \
+              --title "Kite $VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              "dist/Kite-$VERSION.zip"
+          fi
