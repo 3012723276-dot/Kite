@@ -66,6 +66,7 @@ final class SearchViewModel: ObservableObject {
 }
 
 struct SearchView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @StateObject private var model: SearchViewModel
     @State private var searchText: String = ""
 
@@ -98,7 +99,7 @@ struct SearchView: View {
             }
         }
         #endif
-        .navigationTitle(searchText.isEmpty ? "搜索" : String(localized: "搜索：\(searchText)"))
+        .navigationTitle(searchText.isEmpty ? AppLanguageBundle.localizedString("搜索") : String(format: AppLanguageBundle.localizedString("搜索：%@"), searchText))
         .task(id: model.tab) {
             await model.load(tab: model.tab)
         }
