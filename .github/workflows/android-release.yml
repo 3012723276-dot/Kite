@@ -40,8 +40,8 @@ jobs:
         with:
           gradle-version: "9.5.0"
 
-      - name: Setup Android Rust target
-        run: rustup target add aarch64-linux-android
+      - name: Setup Android Rust targets
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 
       - name: Install cargo-ndk
         run: cargo +stable install cargo-ndk --version 4.1.2 --locked
@@ -62,14 +62,17 @@ jobs:
             --out-dir app/build/generated/uniffi/kotlin \
             --no-format
 
-      - name: Build arm64 Rust library for Android
+      - name: Build Rust library for all ABIs
         working-directory: android
         run: |
           rm -rf app/build/generated/uniffi/jniLibs
-          cargo ndk -t arm64-v8a \
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86 -t x86_64 \
             -o app/build/generated/uniffi/jniLibs \
             build -p kumone-ffi --release
           test -f app/build/generated/uniffi/jniLibs/arm64-v8a/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/armeabi-v7a/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/x86/libkumone_ffi.so
+          test -f app/build/generated/uniffi/jniLibs/x86_64/libkumone_ffi.so
 
       - name: Build Debug APK
         run: |
@@ -79,7 +82,7 @@ jobs:
 
       - name: Publish release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           APK=$(find android/app/build/outputs/apk/debug -name '*.apk' -type f -print -quit)
           test -n "$APK"
