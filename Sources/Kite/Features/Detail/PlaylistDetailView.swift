@@ -96,6 +96,7 @@ struct PlaylistDetailView: View {
                                 Label("更多", systemImage: "ellipsis")
                                 .foregroundStyle(.primary)
                             }
+                            .tint(.primary)
                             .accessibilityIdentifier("likedSongsMenu")
                         }
                     }
