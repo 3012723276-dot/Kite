@@ -7,6 +7,46 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## 0.1.61 - 2026-10-26
+
+### **Added**
+
+· In the setting appearance column, a new language switching option has been added.
+· Japanese, the fourth language, has been added.
+
+### **Fixed.**
+
+· Solved some known problems.
+
+### **Improved.**
+
+· Change the red of the bottom UI activity to blue.
+· The color style of some local fonts and icons in the settings has been changed.
+· Deleted the WeChat contact information in the column of contacting the author.
+· The contact information of the mailbox in the contact author column has been changed.
+
+The above is only an introduction to the general content of this update. Please focus on the actual software update for specific software updates.
+
+---
+
+### **新增**
+
+·在设置外观一栏中，新增加了语言切换选项
+·新增第四种语言日文。
+
+### **修复**
+
+·解决了一些已知问题。
+
+### **改进**
+
+·将底部UI活动的红色更改为蓝色。
+·更改了设置内等一些地方字体以及图标的颜色样式。
+·删除了联系作者一栏中微信的联系方式。
+·更改了联系作者一栏中邮箱的联系方式。
+
+以上仅作为本次更新的大致内容的介绍，具体软件的更新请以实际软件内的更新为主。
+
 ## 0.3.21 - 2026-10-19
 
 ### Added
