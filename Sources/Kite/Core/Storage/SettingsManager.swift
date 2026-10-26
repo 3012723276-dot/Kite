@@ -60,6 +60,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     case simplifiedChinese = "zh-Hans"
     case traditionalChinese = "zh-Hant"
     case english = "en"
+    case japanese = "ja"
 
     var id: String { rawValue }
 
@@ -68,6 +69,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .simplifiedChinese: return "简体中文"
         case .traditionalChinese: return "繁體中文"
         case .english: return "English"
+        case .japanese: return "日本語"
         }
     }
 
@@ -76,6 +78,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         let first = Bundle.main.preferredLocalizations.first ?? ""
         if first.hasPrefix("zh-Hant") { return .traditionalChinese }
         if first.hasPrefix("zh") { return .simplifiedChinese }
+        if first.hasPrefix("ja") { return .japanese }
         return .english
     }
 }
