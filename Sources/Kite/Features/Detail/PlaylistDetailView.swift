@@ -80,6 +80,7 @@ struct PlaylistDetailView: View {
                                     searchFocused = true
                                 } label: {
                                     Label("在歌单内查找", systemImage: "magnifyingglass")
+                                        .foregroundStyle(.primary)
                                 }
                                 Menu {
                                     Picker("排序方式", selection: $model.sortOrder) {
@@ -89,9 +90,11 @@ struct PlaylistDetailView: View {
                                     }
                                 } label: {
                                     Label("排序方式", systemImage: "arrow.up.arrow.down")
+                                .foregroundStyle(.primary)
                                 }
                             } label: {
                                 Label("更多", systemImage: "ellipsis")
+                                .foregroundStyle(.primary)
                             }
                             .accessibilityIdentifier("likedSongsMenu")
                         }
