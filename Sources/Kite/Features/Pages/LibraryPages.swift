@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - 最近播放
 
 struct RecentsView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @State private var records: [PlayRecordItem] = []
     @State private var week = false
     @State private var isLoading = true
@@ -54,7 +55,7 @@ struct RecentsView: View {
         } footer: {
             PlayerClearanceSpacer()
         }
-        .navigationTitle("最近播放")
+        .navigationTitle(AppLanguageBundle.localizedString("最近播放"))
         .task(id: week) {
             await load()
         }
@@ -80,7 +81,7 @@ struct RecentsView: View {
             track: record.song,
             index: index + 1,
             style: .compact,
-            trailingText: String(localized: "\(record.playCount) 次")
+            trailingText: String(format: AppLanguageBundle.localizedString("%lld 次"), record.playCount)
         ) {
             player.play(tracks: records.map(\.song), source: .none, startAt: record.song,
                         context: .recents)
@@ -101,6 +102,7 @@ struct RecentsView: View {
 // MARK: - 音乐云盘
 
 struct CloudView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @State private var items: [CloudSongItem] = []
     @State private var sizeInfo: String?
     @State private var isLoading = true
@@ -149,7 +151,7 @@ struct CloudView: View {
         } footer: {
             PlayerClearanceSpacer()
         }
-        .navigationTitle("音乐云盘")
+        .navigationTitle(AppLanguageBundle.localizedString("音乐云盘"))
         .task {
             if items.isEmpty {
                 await load()
@@ -168,7 +170,7 @@ struct CloudView: View {
             if let size = response.size, let max = response.maxSize, max > 0 {
                 let used = String(format: "%.1f", Double(size) / 1_073_741_824)
                 let total = String(format: "%.0f", Double(max) / 1_073_741_824)
-                sizeInfo = String(localized: "已使用 \(used) GB / \(total) GB")
+                sizeInfo = String(format: AppLanguageBundle.localizedString("已使用 %@ GB / %@ GB"), used, total)
             }
         }
         isLoading = false

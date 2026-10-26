@@ -2,6 +2,7 @@ import SwiftUI
 
 
 struct PlaylistDetailView: View {
+    @EnvironmentObject private var settings: SettingsManager
     let playlistID: Int
     var isLikedList = false
     var recommendationContext: RecommendationContext?
@@ -79,6 +80,7 @@ struct PlaylistDetailView: View {
                                     searchFocused = true
                                 } label: {
                                     Label("在歌单内查找", systemImage: "magnifyingglass")
+                                        .foregroundStyle(.primary)
                                 }
                                 Menu {
                                     Picker("排序方式", selection: $model.sortOrder) {
@@ -88,10 +90,13 @@ struct PlaylistDetailView: View {
                                     }
                                 } label: {
                                     Label("排序方式", systemImage: "arrow.up.arrow.down")
+                                .foregroundStyle(.primary)
                                 }
                             } label: {
                                 Label("更多", systemImage: "ellipsis")
+                                .foregroundStyle(.primary)
                             }
+                            .tint(.primary)
                             .accessibilityIdentifier("likedSongsMenu")
                         }
                     }
@@ -132,7 +137,7 @@ struct PlaylistDetailView: View {
             }
         }
         .clipped()
-        .navigationTitle(model.detail?.name ?? String(localized: "歌单"))
+        .navigationTitle(model.detail?.name ?? AppLanguageBundle.localizedString("歌单"))
         #else
         ScrollView {
             VStack(alignment: .leading, spacing: isCompact ? 16 : 20) {
@@ -153,7 +158,7 @@ struct PlaylistDetailView: View {
             }
             #endif
         }
-        .navigationTitle(isSearchActive ? String(localized: "搜索歌单内歌曲") : "")
+        .navigationTitle(isSearchActive ? AppLanguageBundle.localizedString("搜索歌单内歌曲") : "")
         .navigationBarTitleDisplayMode(.inline)
         .scrollDismissesKeyboard(.interactively)
         #endif
@@ -272,7 +277,7 @@ struct PlaylistDetailView: View {
             }
             .padding(.vertical, 12)
         } else if model.tracks.isEmpty {
-            Text(detail.trackCount == 0 ? String(localized: "歌单暂无歌曲") : String(localized: "联网后载入歌曲"))
+            Text(detail.trackCount == 0 ? AppLanguageBundle.localizedString("歌单暂无歌曲") : AppLanguageBundle.localizedString("联网后载入歌曲"))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 32)
@@ -312,7 +317,7 @@ struct PlaylistDetailView: View {
                     .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(isLikedList ? String(localized: "我喜欢的音乐") : detail.name)
+                    Text(isLikedList ? AppLanguageBundle.localizedString("我喜欢的音乐") : detail.name)
                         .font(.system(size: 16, weight: .bold))
                         .lineLimit(3)
 
@@ -356,7 +361,7 @@ struct PlaylistDetailView: View {
                                 .font(.system(size: 14))
                                 .padding(20)
                         }
-                        .navigationTitle("歌单简介")
+                        .navigationTitle(AppLanguageBundle.localizedString("歌单简介"))
                         #if os(iOS)
                         .navigationBarTitleDisplayMode(.inline)
                         #endif
@@ -428,7 +433,7 @@ struct PlaylistDetailView: View {
                 .shadow(color: .black.opacity(0.25), radius: 16, y: 8)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(isLikedList ? String(localized: "我喜欢的音乐") : String(localized: "歌单"))
+                Text(isLikedList ? AppLanguageBundle.localizedString("我喜欢的音乐") : AppLanguageBundle.localizedString("歌单"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
@@ -514,7 +519,7 @@ struct PlaylistDetailView: View {
                 Button {
                     toggleSubscribe(detail)
                 } label: {
-                    Label(detail.subscribed ? String(localized: "已收藏") : String(localized: "收藏"),
+                    Label(detail.subscribed ? AppLanguageBundle.localizedString("已收藏") : AppLanguageBundle.localizedString("收藏"),
                           systemImage: detail.subscribed ? "checkmark" : "plus")
                         .font(.system(size: 13, weight: .medium))
                         .padding(.horizontal, 14)
@@ -561,11 +566,11 @@ struct PlaylistDetailView: View {
             do {
                 let tracks = try await NeteaseAPI.intelligenceList(songID: seed.id, playlistID: playlistID)
                 guard !tracks.isEmpty else {
-                    ToastCenter.shared.show(String(localized: "心动模式暂时不可用"))
+                    ToastCenter.shared.show(AppLanguageBundle.localizedString("心动模式暂时不可用"))
                     return
                 }
                 player.play(tracks: tracks, source: .playlist(playlistID), context: .heartbeat)
-                ToastCenter.shared.show(String(localized: "已开启心动模式"))
+                ToastCenter.shared.show(AppLanguageBundle.localizedString("已开启心动模式"))
             } catch {
                 ToastCenter.shared.show(error.localizedDescription)
             }

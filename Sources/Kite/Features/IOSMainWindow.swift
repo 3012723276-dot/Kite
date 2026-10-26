@@ -45,6 +45,10 @@ public struct IOSMainWindow: View {
             .environmentObject(toasts)
             .environmentObject(artworkStore)
             .tint(Theme.accent)
+            // In-app language (beta2): drives SwiftUI localized-string
+            // lookup and date/number formatting; the Bundle redirect in
+            // SettingsManager covers String(localized:) code paths.
+            .environment(\.locale, Locale(identifier: settings.effectiveAppLanguage.rawValue))
             .preferredColorScheme(settings.appearance.colorScheme)
             .environment(\.openLogin, { showLogin = true })
             .environment(\.openDestination, openDestination)
@@ -257,6 +261,7 @@ public struct IOSMainWindow: View {
                 Label("搜索", systemImage: "magnifyingglass")
             }
         }
+        .tint(.blue)
     }
 
     private var customTabInterface: some View {
@@ -568,7 +573,7 @@ struct IOSMiniPlayerBar: View {
     }
 
     private var nowPlayingAccessibilityLabel: String {
-        let title = player.currentTrack?.name ?? String(localized: "正在播放")
+        let title = player.currentTrack?.name ?? AppLanguageBundle.localizedString("正在播放")
         guard let artist = player.currentTrack?.artistNames, !artist.isEmpty else {
             return title
         }
@@ -600,6 +605,7 @@ struct IOSMiniPlayerBar: View {
 // MARK: - iOS Library View
 
 struct IOSLibraryView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @Binding var showLogin: Bool
     @EnvironmentObject private var account: AccountStore
     @State private var showSettings = false
@@ -640,14 +646,14 @@ struct IOSLibraryView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: 32))
-                                .foregroundStyle(Theme.accent)
+                                .foregroundStyle(.primary)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("登录网易云音乐")
                                     .font(.headline)
                                     .foregroundStyle(.primary)
                                 Text("同步我喜欢的音乐、歌单与每日推荐")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.primary)
                             }
                         }
                         .padding(.vertical, 6)
@@ -657,7 +663,12 @@ struct IOSLibraryView: View {
 
             Section {
                 NavigationLink(value: Destination.downloaded) {
-                    Label("已下载", systemImage: "arrow.down.circle.fill")
+                    Label {
+                        Text("已下载")
+                    } icon: {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.blue)
+                    }
                 }
             }
 
@@ -670,16 +681,36 @@ struct IOSLibraryView: View {
                         }
                     }
                     NavigationLink(value: Destination.daily) {
-                        Label("每日推荐", systemImage: "calendar")
+                        Label {
+                            Text("每日推荐")
+                        } icon: {
+                            Image(systemName: "calendar")
+                                .foregroundStyle(.primary)
+                        }
                     }
                     NavigationLink(value: Destination.recents) {
-                        Label("最近播放", systemImage: "clock.fill")
+                        Label {
+                            Text("最近播放")
+                        } icon: {
+                            Image(systemName: "clock.fill")
+                                .foregroundStyle(.primary)
+                        }
                     }
                     NavigationLink(value: Destination.collections) {
-                        Label("我的收藏", systemImage: "star.fill")
+                        Label {
+                            Text("我的收藏")
+                        } icon: {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.primary)
+                        }
                     }
                     NavigationLink(value: Destination.cloud) {
-                        Label("音乐云盘", systemImage: "icloud.fill")
+                        Label {
+                            Text("音乐云盘")
+                        } icon: {
+                            Image(systemName: "icloud.fill")
+                                .foregroundStyle(.primary)
+                        }
                     }
                 }
 
@@ -744,7 +775,7 @@ struct IOSLibraryView: View {
                     .listRowBackground(Color.clear)
             }
         }
-        .navigationTitle("我的")
+        .navigationTitle(AppLanguageBundle.localizedString("我的"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -752,13 +783,14 @@ struct IOSLibraryView: View {
                 } label: {
                     Image(systemName: "gearshape")
                 }
+                .tint(.primary)
                 .accessibilityLabel("设置")
             }
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView()
-                    .navigationTitle("设置")
+                    .navigationTitle(AppLanguageBundle.localizedString("设置"))
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("完成") {
@@ -767,6 +799,11 @@ struct IOSLibraryView: View {
                         }
                     }
             }
+            // Settings sheet only (beta2): values, the Done button and
+            // row icons use the primary color — white in dark mode —
+            // instead of the app-wide red accent. Toggles keep their own
+            // green tint and the slider its primary tint inside Settings.
+            .tint(.primary)
         }
         .alert("新建歌单", isPresented: $showNewPlaylist) {
             TextField("歌单名称", text: $newPlaylistName)
@@ -778,7 +815,7 @@ struct IOSLibraryView: View {
                     do {
                         try await NeteaseAPI.createPlaylist(name: name, isPrivate: false)
                         await account.refreshLibrary()
-                        ToastCenter.shared.show(String(localized: "歌单已创建"))
+                        ToastCenter.shared.show(AppLanguageBundle.localizedString("歌单已创建"))
                     } catch {
                         ToastCenter.shared.show(error.localizedDescription)
                     }

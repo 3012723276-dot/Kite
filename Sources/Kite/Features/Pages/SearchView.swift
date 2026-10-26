@@ -66,6 +66,7 @@ final class SearchViewModel: ObservableObject {
 }
 
 struct SearchView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @StateObject private var model: SearchViewModel
     @State private var searchText: String = ""
 
@@ -81,6 +82,9 @@ struct SearchView: View {
         // toolbar search field is unavailable. On macOS, MainWindow owns the
         // only search field and navigates here with its submitted query.
         .searchable(text: $searchText, prompt: "搜索歌曲、歌手、专辑、歌单")
+        // beta4: the blinking input caret follows tint; it was red (the app
+        // accent) — make it blue like the other beta4 accents.
+        .tint(.blue)
         .onSubmit(of: .search) {
             model.setQuery(searchText)
             Task { await model.load(tab: model.tab) }
@@ -95,7 +99,7 @@ struct SearchView: View {
             }
         }
         #endif
-        .navigationTitle(searchText.isEmpty ? "搜索" : String(localized: "搜索：\(searchText)"))
+        .navigationTitle(searchText.isEmpty ? AppLanguageBundle.localizedString("搜索") : String(format: AppLanguageBundle.localizedString("搜索：%@"), searchText))
         .task(id: model.tab) {
             await model.load(tab: model.tab)
         }

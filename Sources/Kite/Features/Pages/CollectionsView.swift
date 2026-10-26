@@ -2,6 +2,7 @@ import SwiftUI
 
 /// 我的收藏 — liked albums and followed artists.
 struct CollectionsView: View {
+    @EnvironmentObject private var settings: SettingsManager
     private enum Tab: String, CaseIterable, Identifiable {
         case albums = "专辑"
         case artists = "歌手"
@@ -82,7 +83,7 @@ struct CollectionsView: View {
                 PlayerClearanceSpacer()
             }
         }
-        .navigationTitle("我的收藏")
+        .navigationTitle(AppLanguageBundle.localizedString("我的收藏"))
         .task {
             await account.refreshSublists()
             isLoading = false

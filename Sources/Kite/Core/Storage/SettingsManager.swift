@@ -1,3 +1,4 @@
+import ObjectiveC
 import SwiftUI
 
 enum AudioQuality: String, CaseIterable, Identifiable {
@@ -11,21 +12,21 @@ enum AudioQuality: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .standard: return String(localized: "标准")
-        case .higher: return String(localized: "较高")
-        case .exhigh: return String(localized: "极高")
-        case .lossless: return String(localized: "无损")
+        case .standard: return AppLanguageBundle.localizedString("标准")
+        case .higher: return AppLanguageBundle.localizedString("较高")
+        case .exhigh: return AppLanguageBundle.localizedString("极高")
+        case .lossless: return AppLanguageBundle.localizedString("无损")
         case .hires: return "Hi-Res"
         }
     }
 
     var badge: String {
         switch self {
-        case .standard: return String(localized: "标准")
-        case .higher: return String(localized: "较高")
-        case .exhigh: return String(localized: "极高")
-        case .lossless: return String(localized: "无损")
-        case .hires: return String(localized: "高解析")
+        case .standard: return AppLanguageBundle.localizedString("标准")
+        case .higher: return AppLanguageBundle.localizedString("较高")
+        case .exhigh: return AppLanguageBundle.localizedString("极高")
+        case .lossless: return AppLanguageBundle.localizedString("无损")
+        case .hires: return AppLanguageBundle.localizedString("高解析")
         }
     }
 }
@@ -37,9 +38,9 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .auto: return String(localized: "跟随系统")
-        case .light: return String(localized: "浅色")
-        case .dark: return String(localized: "深色")
+        case .auto: return AppLanguageBundle.localizedString("跟随系统")
+        case .light: return AppLanguageBundle.localizedString("浅色")
+        case .dark: return AppLanguageBundle.localizedString("深色")
         }
     }
 
@@ -49,6 +50,33 @@ enum AppAppearance: String, CaseIterable, Identifiable {
         case .light: return .light
         case .dark: return .dark
         }
+    }
+}
+
+/// In-app language (beta2). Each option is always shown in its own script —
+/// never translated — so 简体中文 stays 简体中文, 繁體中文 stays 繁體中文,
+/// and English stays English, whichever UI language is active.
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case simplifiedChinese = "zh-Hans"
+    case traditionalChinese = "zh-Hant"
+    case english = "en"
+
+    var id: String { rawValue }
+
+    var nativeName: String {
+        switch self {
+        case .simplifiedChinese: return "简体中文"
+        case .traditionalChinese: return "繁體中文"
+        case .english: return "English"
+        }
+    }
+
+    /// The language the app bundle itself would pick for the system language.
+    static var systemDefault: AppLanguage {
+        let first = Bundle.main.preferredLocalizations.first ?? ""
+        if first.hasPrefix("zh-Hant") { return .traditionalChinese }
+        if first.hasPrefix("zh") { return .simplifiedChinese }
+        return .english
     }
 }
 
@@ -62,9 +90,9 @@ enum LyricsAnnotation: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .off: return String(localized: "关闭")
-        case .romaji: return String(localized: "罗马音")
-        case .furigana: return String(localized: "汉字读音")
+        case .off: return AppLanguageBundle.localizedString("关闭")
+        case .romaji: return AppLanguageBundle.localizedString("罗马音")
+        case .furigana: return AppLanguageBundle.localizedString("汉字读音")
         }
     }
 }
@@ -79,10 +107,10 @@ public enum NowPlayingMode: String, CaseIterable, Identifiable {
 
     public var displayName: String {
         switch self {
-        case .vinyl: return String(localized: "黑胶模式")
-        case .classic: return String(localized: "经典模式")
-        case .immersive: return String(localized: "沉浸模式")
-        case .minimal: return String(localized: "简洁模式")
+        case .vinyl: return AppLanguageBundle.localizedString("黑胶模式")
+        case .classic: return AppLanguageBundle.localizedString("经典模式")
+        case .immersive: return AppLanguageBundle.localizedString("沉浸模式")
+        case .minimal: return AppLanguageBundle.localizedString("简洁模式")
         }
     }
 }
@@ -118,6 +146,7 @@ final class SettingsManager: ObservableObject {
         static let outputDevice = "settings.outputDeviceUID"
         #endif
         static let desktopLyricsCentered = "settings.desktopLyricsCentered"
+        static let language = "settings.appLanguage"
         static let mainWindowAmbientBackground = "settings.showMainWindowAmbientBackground"
         static let mainWindowAmbientBackgroundIntensity = "settings.mainWindowAmbientBackgroundIntensity"
         static let enableAudioCache = "settings.enableAudioCache"
@@ -168,6 +197,29 @@ final class SettingsManager: ObservableObject {
 
     @Published var appearance: AppAppearance {
         didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Keys.appearance) }
+    }
+
+    /// Explicit in-app language choice, or nil to follow the system language.
+    /// The picker only offers the three languages; there is no "follow system"
+    /// row — once a language is picked it stays picked.
+    @Published var appLanguage: AppLanguage? {
+        didSet {
+            if let appLanguage {
+                UserDefaults.standard.set(appLanguage.rawValue, forKey: Keys.language)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Keys.language)
+            }
+            AppLanguageBundle.install()
+        }
+    }
+
+    /// The language actually in use: the explicit choice, or the system one.
+    var effectiveAppLanguage: AppLanguage { appLanguage ?? .systemDefault }
+
+    /// Picker order: the current language first, then the other two in
+    /// canonical order (Simplified, Traditional, English).
+    var orderedAppLanguages: [AppLanguage] {
+        [effectiveAppLanguage] + AppLanguage.allCases.filter { $0 != effectiveAppLanguage }
     }
 
     @Published var nowPlayingMode: NowPlayingMode {
@@ -332,6 +384,8 @@ final class SettingsManager: ObservableObject {
         audioCacheSizeMB = normalizedAudioCacheSizeMB
         defaults.set(normalizedAudioCacheSizeMB, forKey: Keys.audioCacheSizeMB)
         appearance = defaults.string(forKey: Keys.appearance).flatMap(AppAppearance.init) ?? .auto
+        appLanguage = defaults.string(forKey: Keys.language).flatMap(AppLanguage.init)
+        AppLanguageBundle.install()
         nowPlayingMode = defaults.string(forKey: Keys.nowPlayingMode).flatMap(NowPlayingMode.init) ?? .immersive
         showLyricsTranslation = defaults.object(forKey: Keys.showTranslation) as? Bool ?? true
         // Carry over the old on/off romaji toggle for anyone who had it on.
@@ -369,5 +423,62 @@ final class SettingsManager: ObservableObject {
             max(storedAmbientBackgroundIntensity, Self.mainWindowAmbientBackgroundIntensityRange.lowerBound),
             Self.mainWindowAmbientBackgroundIntensityRange.upperBound
         )
+    }
+}
+
+/// In-app language override (beta2): redirect Bundle.main string lookups to
+/// the chosen language's .lproj so picking a language re-localizes the UI
+/// immediately, without restarting the app. When no language is chosen, the
+/// stored key is absent and lookups behave exactly as before (system
+/// language). The choice is read straight from UserDefaults here so the
+/// redirect is safe from any thread; the swizzle itself installs once.
+enum AppLanguageBundle {
+    /// Installs the redirect exactly once: touching `token` runs its lazy
+    /// initializer a single time, thread-safely, and later calls are no-ops.
+    static func install() {
+        _ = token
+    }
+
+    /// Looks a key up in the language the user picked in Settings, not the
+    /// system language. This is what the option names (quality, theme,
+    /// player mode, lyrics reading, audio source) must use: plain
+    /// `String(localized:)` resolves against the system language and ignores
+    /// the in-app choice, which is why those values stayed Chinese in the
+    /// English UI. When no language is picked, falls back to the system
+    /// lookup (which the swizzle above also redirects, if installed).
+    static func localizedString(_ key: String) -> String {
+        if let code = UserDefaults.standard.string(forKey: "settings.appLanguage"),
+           let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: key, table: "Localizable")
+        }
+        return NSLocalizedString(key, tableName: "Localizable", bundle: .main, value: key, comment: "")
+    }
+
+    private static let token: Void = {
+        guard
+            let original = class_getInstanceMethod(
+                Bundle.self, #selector(Bundle.localizedString(forKey:value:table:))),
+            let swizzled = class_getInstanceMethod(
+                Bundle.self, #selector(Bundle.kite_localizedString(forKey:value:table:)))
+        else { return }
+        method_exchangeImplementations(original, swizzled)
+    }()
+}
+
+extension Bundle {
+    @objc func kite_localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
+        // After the exchange, calling kite_localizedString invokes the
+        // original implementation — both in the redirect below (the language
+        // bundle is not .main) and in the fallthrough.
+        if self === Bundle.main,
+           // Same key as SettingsManager.Keys.language, spelled out here so
+           // this nonisolated method never depends on the @MainActor type.
+           let code = UserDefaults.standard.string(forKey: "settings.appLanguage"),
+           let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let languageBundle = Bundle(path: path) {
+            return languageBundle.kite_localizedString(forKey: key, value: value, table: tableName)
+        }
+        return self.kite_localizedString(forKey: key, value: value, table: tableName)
     }
 }

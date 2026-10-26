@@ -9,7 +9,7 @@ import SwiftUI
 ///     way Telegram tints it — a faint darkening (black @ 7.5%) in light /
 ///     white @ 10% in dark, not a bright chip;
 ///   • items whose 23pt filled icon and 10pt semibold label share one colour:
-///     black @ 80% unselected, accent when selected;
+///     black @ 80% unselected, blue when selected (beta3);
 ///   • **an interactive pill you can drag** across the tabs — the lens tracks
 ///     your finger and switches tabs live, then settles with a spring on
 ///     release; a plain tap slides it there instead.
@@ -82,7 +82,7 @@ struct GlassTabBar: View {
                 .font(.system(size: 10, weight: .semibold))
         }
         .foregroundStyle(isSelected
-                         ? AnyShapeStyle(Theme.accent)
+                         ? AnyShapeStyle(Color.blue)
                          : AnyShapeStyle(Color.primary.opacity(0.8)))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())

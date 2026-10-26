@@ -37,7 +37,7 @@ struct StorageSpaceView: View {
             }
 
             Section {
-                LabeledContent(model.snapshot?.partial == true ? String(localized: "已统计的 Kite 占用") : String(localized: "Kite 占用")) {
+                LabeledContent(model.snapshot?.partial == true ? AppLanguageBundle.localizedString("已统计的 Kite 占用") : AppLanguageBundle.localizedString("Kite 占用")) {
                     Text(model.snapshot.map { format($0.appBytes) } ?? "—")
                         .font(.body.weight(.semibold)).monospacedDigit()
                 }
@@ -68,8 +68,10 @@ struct StorageSpaceView: View {
                     Text("8 GB").tag(Int64(8) << 30)
                     Text("不限").tag(Int64(0))
                 }
+                .tint(.secondary)
                 #else
                 Toggle("歌曲缓存", isOn: $settings.enableAudioCache)
+                    .tint(.green)
                 if settings.enableAudioCache {
                     Picker("上限", selection: cacheLimitSelection) {
                         if let automaticLimitMB {
@@ -81,6 +83,7 @@ struct StorageSpaceView: View {
                             Text(format(Int64(megabytes) * 1_000_000)).tag(megabytes)
                         }
                     }
+                    .tint(.secondary)
                 }
                 #endif
                 Button(role: .destructive) { Task { await model.clear(.musicCache) } } label: {
@@ -127,12 +130,12 @@ struct StorageSpaceView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            if let message = model.message ?? (model.snapshot?.partial == true ? String(localized: "部分存储信息不可用") : nil) {
+            if let message = model.message ?? (model.snapshot?.partial == true ? AppLanguageBundle.localizedString("部分存储信息不可用") : nil) {
                 Section { Text(message).font(.footnote).foregroundStyle(.secondary).accessibilityAddTraits(.updatesFrequently) }
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("存储空间")
+        .navigationTitle(AppLanguageBundle.localizedString("存储空间"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif

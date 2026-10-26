@@ -59,7 +59,7 @@ final class HomeViewModel: ObservableObject {
             await loadRadarPlaylists()
         }
 
-        state = playlists.isEmpty && newAlbums.isEmpty ? .error(String(localized: "网络连接失败")) : .loaded
+        state = playlists.isEmpty && newAlbums.isEmpty ? .error(AppLanguageBundle.localizedString("网络连接失败")) : .loaded
     }
 
     func reload(loggedIn: Bool) async {
@@ -84,7 +84,7 @@ final class HomeViewModel: ObservableObject {
             guard let brief = briefs[id] else { return nil }
             // Names arrive as "今天从《…》听起|私人雷达" — split into title/subtitle.
             let parts = (brief.name ?? "").components(separatedBy: "|")
-            let title = parts.count > 1 ? parts.last! : (brief.name ?? String(localized: "雷达歌单"))
+            let title = parts.count > 1 ? parts.last! : (brief.name ?? AppLanguageBundle.localizedString("雷达歌单"))
             let subtitle = parts.count > 1 ? parts.dropLast().joined(separator: "|") : nil
             return RadarPlaylist(id: id, title: title, subtitle: subtitle, coverURL: brief.coverImgUrl)
         }
@@ -104,6 +104,7 @@ final class HomeViewModel: ObservableObject {
 }
 
 struct HomeView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @EnvironmentObject private var account: AccountStore
     @EnvironmentObject private var player: PlayerService
     @StateObject private var model = HomeViewModel.shared
@@ -122,7 +123,7 @@ struct HomeView: View {
                 loadedBody
             }
         }
-        .navigationTitle("推荐")
+        .navigationTitle(AppLanguageBundle.localizedString("推荐"))
         .task(id: account.isLoggedIn) {
             await model.load(loggedIn: account.isLoggedIn)
         }
@@ -280,18 +281,18 @@ struct HomeView: View {
         guard let likedList = account.likedSongsPlaylist else { return }
         Task {
             guard let seed = account.likedTrackIDs.randomElement() else {
-                ToastCenter.shared.show(String(localized: "先收藏一些喜欢的歌曲吧"))
+                ToastCenter.shared.show(AppLanguageBundle.localizedString("先收藏一些喜欢的歌曲吧"))
                 return
             }
             do {
                 let tracks = try await NeteaseAPI.intelligenceList(songID: seed, playlistID: likedList.id)
                 guard !tracks.isEmpty else {
-                    ToastCenter.shared.show(String(localized: "心动模式暂时不可用"))
+                    ToastCenter.shared.show(AppLanguageBundle.localizedString("心动模式暂时不可用"))
                     return
                 }
                 player.play(tracks: tracks, source: .playlist(likedList.id),
                             context: .heartbeat)
-                ToastCenter.shared.show(String(localized: "已开启心动模式"))
+                ToastCenter.shared.show(AppLanguageBundle.localizedString("已开启心动模式"))
             } catch {
                 ToastCenter.shared.show(error.localizedDescription)
             }

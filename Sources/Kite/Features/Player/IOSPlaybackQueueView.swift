@@ -2,6 +2,7 @@ import SwiftUI
 
 #if os(iOS)
 struct IOSPlaybackQueueView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @EnvironmentObject private var player: PlayerService
     let backdrop: ArtworkColors
     @EnvironmentObject private var toasts: ToastCenter
@@ -40,7 +41,7 @@ struct IOSPlaybackQueueView: View {
                 }
                 .padding(10)
             }
-            .navigationTitle("播放队列")
+            .navigationTitle(AppLanguageBundle.localizedString("播放队列"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

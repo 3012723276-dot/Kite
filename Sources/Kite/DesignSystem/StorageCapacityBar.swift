@@ -23,7 +23,7 @@ struct StorageCapacityBar: View {
 
     @ViewBuilder
     private var legend: some View {
-        item("Kite", color: .red)
+        item("Kite", color: .primary)
         item("其他已用", color: .gray.opacity(0.55))
         item("可用", color: .primary.opacity(0.12))
     }
@@ -41,7 +41,7 @@ struct StorageCapacityBar: View {
 private struct SegmentedStorageProgressStyle: ProgressViewStyle {
     let fractions: [Double]
     let height: CGFloat
-    private let colors: [Color] = [.red, .gray.opacity(0.45), .primary.opacity(0.04)]
+    private let colors: [Color] = [.primary, .gray.opacity(0.45), .primary.opacity(0.04)]
 
     func makeBody(configuration: Configuration) -> some View {
         GeometryReader { geometry in

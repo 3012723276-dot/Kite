@@ -529,3 +529,32 @@
 "同步数据需要更新版本的 Kite" = "Sync data requires a newer version of Kite";
 "接续需要登录同一网易云账号" = "Sign in to the same NetEase account to continue playback";
 "iCloud 账号已更改" = "iCloud account changed";
+"语言" = "Language";
+"设置" = "Settings";
+"播放页模式" = "Player Page Mode";
+"黑胶模式" = "Vinyl Mode";
+"经典模式" = "Classic Mode";
+"沉浸模式" = "Immersive Mode";
+"简洁模式" = "Minimal Mode";
+"逐字歌词（卡拉OK）" = "Word-by-Word Lyrics (Karaoke)";
+"主界面环境色" = "Main Interface Ambient Color";
+"背景色强度" = "Background Color Intensity";
+"同步我喜欢的音乐、歌单与每日推荐" = "Sync your liked songs, playlists, and daily recommendations";
+"通用" = "General";
+"桌面歌词水平居中" = "Center desktop lyrics horizontally";
+"下载 IPA 手动侧载" = "Download IPA for Manual Sideloading";
+"下载完成" = "Download Complete";
+"导入到签名工具" = "Import into Signing Tool";
+"自动安装（TrollStore）" = "Auto-Install (TrollStore)";
+"已装 TrollStore（巨魔）将自动安装；否则用「下载 IPA」手动侧载" = "With TrollStore installed, it will install automatically; otherwise use “Download IPA” for manual sideloading";
+"无法唤起 TrollStore，请改用「下载 IPA」手动侧载" = "Couldn’t open TrollStore. Please use “Download IPA” for manual sideloading";
+"无法构造安装链接" = "Couldn’t build the install link";
+"我的音乐" = "My Music";
+"搜索" = "Search";
+"打开正在播放" = "Open Now Playing";
+"已保存到「文件」App ▸ 我的 iPhone ▸ Kite。用下方按钮直接导入签名工具（全能签 / ESign 等），或在「文件」里手动打开。" = "Saved to the Files app ▸ On My iPhone ▸ Kite. Use the button below to import it into a signing tool (ESign, etc.), or open it manually in Files.";
+
+"专辑简介" = "Album Intro";
+"歌单简介" = "Playlist Intro";
+
+"联系作者" = "Contact the Author";

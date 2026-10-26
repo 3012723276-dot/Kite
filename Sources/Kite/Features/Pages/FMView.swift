@@ -2,6 +2,7 @@ import SwiftUI
 
 /// 私人漫游 — immersive personal FM page.
 struct FMView: View {
+    @EnvironmentObject private var settings: SettingsManager
     @EnvironmentObject private var player: PlayerService
     @EnvironmentObject private var account: AccountStore
     @Environment(\.openLogin) private var openLogin
@@ -24,7 +25,7 @@ struct FMView: View {
                 loginPrompt
             }
         }
-        .navigationTitle("漫游")
+        .navigationTitle(AppLanguageBundle.localizedString("漫游"))
         .compatHiddenToolbarBackground()
     }
 
@@ -91,7 +92,7 @@ struct FMView: View {
 
                 VStack(spacing: 6) {
                     HStack(spacing: 8) {
-                        Text(track?.name ?? String(localized: "私人漫游"))
+                        Text(track?.name ?? AppLanguageBundle.localizedString("私人漫游"))
                             .font(
                                 .system(
                                     size: isPhone && geo.size.height < 520 ? 18 : 22,
@@ -103,7 +104,7 @@ struct FMView: View {
                             VIPBadge()
                         }
                     }
-                    Text(track?.artistNames ?? String(localized: "根据你的口味漫游好音乐"))
+                    Text(track?.artistNames ?? AppLanguageBundle.localizedString("根据你的口味漫游好音乐"))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -197,7 +198,7 @@ struct FMView: View {
                 .foregroundStyle(.secondary)
             Button("登录") { openLogin() }
                 .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
+                .tint(.blue)
         }
     }
 }

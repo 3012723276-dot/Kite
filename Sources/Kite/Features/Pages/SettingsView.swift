@@ -49,12 +49,15 @@ struct SettingsView: View {
                 Picker("音质", selection: $settings.audioQuality) {
                     ForEach(AudioQuality.allCases) { quality in
                         Text(quality.displayName).tag(quality)
+                            .foregroundStyle(quality == settings.audioQuality ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 Text("无损与 Hi-Res 需要黑胶 VIP，未开通时自动回落到可用音质")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("灰色歌曲解锁", isOn: $settings.enableUnblock)
+                    .tint(.green)
                 Text("无版权或下架歌曲将从已启用音源中匹配播放")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -77,6 +80,7 @@ struct SettingsView: View {
                                 }
                             }
                         ))
+                        .tint(.green)
                     }
                     // Kuwo is the last source in AudioSourceID.allCases,
                     // so this footnote sits directly under the Kuwo row,
@@ -94,8 +98,10 @@ struct SettingsView: View {
                 Picker("主题", selection: $settings.appearance) {
                     ForEach(AppAppearance.allCases) { appearance in
                         Text(appearance.displayName).tag(appearance)
+                            .foregroundStyle(appearance == settings.appearance ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 #if os(macOS)
                 // macOS only renders two now-playing layouts — 黑胶 and the
                 // regular page; the iOS 沉浸/简洁 options all fall back to the
@@ -107,26 +113,52 @@ struct SettingsView: View {
                     set: { settings.nowPlayingMode = $0 }
                 )) {
                     Text(NowPlayingMode.vinyl.displayName).tag(NowPlayingMode.vinyl)
+                        .foregroundStyle(settings.nowPlayingMode == .vinyl ? .primary : .secondary)
                     Text(NowPlayingMode.classic.displayName).tag(NowPlayingMode.classic)
+                        .foregroundStyle(settings.nowPlayingMode == .vinyl ? .secondary : .primary)
                 }
+                .tint(.secondary)
                 #else
                 Picker("播放页模式", selection: $settings.nowPlayingMode) {
                     ForEach(NowPlayingMode.allCases) { mode in
                         Text(mode.displayName).tag(mode)
+                            .foregroundStyle(mode == settings.nowPlayingMode ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 #endif
+                // Language row (beta2): sits between the player-page mode
+                // picker and the lyrics-translation toggle. The trailing
+                // value is the current language, shown in its own script;
+                // the picker lists the current language first, then the
+                // other two, with a checkmark on the current one (the
+                // Picker's selection). Names are verbatim, never localized.
+                Picker("语言", selection: Binding(
+                    get: { settings.effectiveAppLanguage },
+                    set: { settings.appLanguage = $0 }
+                )) {
+                    ForEach(settings.orderedAppLanguages) { language in
+                        Text(verbatim: language.nativeName).tag(language)
+                            .foregroundStyle(language == settings.effectiveAppLanguage ? .primary : .secondary)
+                    }
+                }
+                .tint(.secondary)
                 Toggle("显示歌词翻译", isOn: $settings.showLyricsTranslation)
+                    .tint(.green)
                 Toggle("逐字歌词（卡拉OK）", isOn: $settings.verbatimLyrics)
+                    .tint(.green)
                 Picker("日文歌词读音", selection: $settings.lyricsAnnotation) {
                     ForEach(LyricsAnnotation.allCases) { annotation in
                         Text(annotation.displayName).tag(annotation)
+                            .foregroundStyle(annotation == settings.lyricsAnnotation ? .primary : .secondary)
                     }
                 }
+                .tint(.secondary)
                 Text("罗马音在歌词上方另起一行，汉字读音把假名标在汉字正上方；缺少官方罗马音时自动生成读音")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("主界面环境色", isOn: $settings.showMainWindowAmbientBackground)
+                    .tint(.green)
                 if settings.showMainWindowAmbientBackground {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
@@ -140,6 +172,7 @@ struct SettingsView: View {
                             in: SettingsManager.mainWindowAmbientBackgroundIntensityRange,
                             step: 0.1
                         )
+                        .tint(.primary)
                         HStack {
                             Text("50%")
                             Spacer()
@@ -151,8 +184,10 @@ struct SettingsView: View {
                 }
                 #if os(macOS)
                 Toggle("桌面歌词", isOn: $settings.showDesktopLyrics)
+                    .tint(.green)
                 if settings.showDesktopLyrics {
                     Toggle("桌面歌词水平居中", isOn: $settings.desktopLyricsCentered)
+                    .tint(.green)
                 }
                 Text("在屏幕上悬浮显示当前歌词，可拖动调整位置")
                     .font(.caption)
@@ -193,6 +228,7 @@ struct SettingsView: View {
 
             Section("更新") {
                 Toggle("启动时自动检查更新", isOn: $settings.autoCheckUpdates)
+                    .tint(.green)
                 Text("关闭后启动不再自动弹出更新提示，仍可手动检查更新")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -215,11 +251,11 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("联系我们") {
+            Section("联系作者") {
                 // No leading icons in this section. The three link rows are
-                // plain-style buttons so they render in the same primary /
-                // secondary colors as the WeChat row below, instead of the
-                // app's red accent color that a default Button would use.
+                // plain-style buttons so they render in primary /
+                // secondary colors instead of the app's red accent color
+                // that a default Button would use.
                 // Every row also has a long-press menu that copies the
                 // contact value on the right; tapping the first three rows
                 // still opens their link / mail app.
@@ -262,14 +298,14 @@ struct SettingsView: View {
                     }
                 }
                 Button {
-                    if let url = URL(string: "mailto:3012723276@qq.com") {
+                    if let url = URL(string: "mailto:kite090127@gmail.com") {
                         openURL(url)
                     }
                 } label: {
                     HStack {
                         Text("Email")
                         Spacer()
-                        Text("3012723276@qq.com")
+                        Text("kite090127@gmail.com")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -282,18 +318,7 @@ struct SettingsView: View {
                 .tint(.secondary)
                 .contextMenu {
                     Button("复制") {
-                        Platform.copyToPasteboard(string: "3012723276@qq.com")
-                    }
-                }
-                HStack {
-                    Text("WeChat")
-                    Spacer()
-                    Text("Kite_090127")
-                        .foregroundStyle(.secondary)
-                }
-                .contextMenu {
-                    Button("复制") {
-                        Platform.copyToPasteboard(string: "Kite_090127")
+                        Platform.copyToPasteboard(string: "kite090127@gmail.com")
                     }
                 }
             }
