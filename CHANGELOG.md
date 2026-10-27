@@ -7,6 +7,30 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## iOS 0.1.7-Beta3 - 2026-10-28
+
+### Added
+
+- Lock Screen Lyrics: while a song with lyrics plays, the system player's card on the Lock Screen and in Control Center shows the current lyric line under the "Song — Artist" title, advancing line by line with playback. Toggle it in Settings → Appearance → Lock Screen Lyrics (on by default).
+
+---
+
+### 新增
+
+- 锁屏歌词：播放有歌词的歌曲时，锁屏和控制中心的系统播放器卡片会在「歌名 — 歌手」下方显示当前歌词行，并随播放逐行推进。开关在 设置 → 外观 → 锁屏歌词（默认开启）。
+
+## iOS 0.1.7-Beta2 - 2026-10-27
+
+### Added
+
+- Lock Screen Lyrics: Kite now provides a song's lyrics to the system player, so they appear in the lyrics view of the iOS player on the Lock Screen and in Control Center (open the player to read them). Toggle it in Settings → Appearance → Lock Screen Lyrics (on by default).
+
+---
+
+### 新增
+
+- 锁屏歌词：Kite 现在会把歌词提供给系统播放器，在锁屏和控制中心的 iOS 播放器中展开即可查看歌词。开关在 设置 → 外观 → 锁屏歌词（默认开启）。
+
 ## iOS 0.1.62 - 2026-10-27
 
 ### Added

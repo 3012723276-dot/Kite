@@ -11,6 +11,9 @@ final class NowPlayingManager {
     private var artworkTask: Task<Void, Never>?
     private var playbackStateCancellables: Set<AnyCancellable> = []
     private var info: [String: Any] = [:]
+    /// The track `info` currently describes, kept so the lock-screen
+    /// lyric line can rewrite title / artist without a service round-trip.
+    private var metadataTrack: Track?
 
     private init() {}
 
@@ -119,6 +122,64 @@ final class NowPlayingManager {
                 }
             }
             .store(in: &playbackStateCancellables)
+
+        // Lock-screen lyrics (0.1.7): hand the parsed lyrics to the system
+        // player through the standard lyrics metadata key, so they appear
+        // in the system player's lyrics page (the expanded player on the
+        // lock screen and in Control Center). Lyrics load after the track
+        // metadata is set, hence a subscription rather than doing this in
+        // updateMetadata alone.
+        player.$lyrics
+            .sink { [weak self] _ in self?.refreshSystemLyrics() }
+            .store(in: &playbackStateCancellables)
+        player.lyricsCursor.$activeIndex
+            .sink { [weak self] _ in self?.refreshSystemLyrics() }
+            .store(in: &playbackStateCancellables)
+        SettingsManager.shared.$lockScreenLyrics
+            .sink { [weak self] _ in self?.refreshSystemLyrics() }
+            .store(in: &playbackStateCancellables)
+    }
+
+    /// Publishes (or withdraws) the lyrics in the now-playing info,
+    /// according to the 锁屏歌词 setting. Also called at the end of
+    /// updateMetadata, which rebuilds `info` from scratch.
+    ///
+    /// On iOS this also drives the lock-screen lyric line, QQ Music style:
+    /// the system card renders exactly two text lines (title / artist) and
+    /// cannot be customized, so while the setting is on the title carries
+    /// "Song — Artist" and the artist slot carries the current lyric line,
+    /// updated as the cursor moves. Songs without lyrics keep the standard
+    /// title / artist display.
+    func refreshSystemLyrics() {
+        guard !info.isEmpty else { return }
+        let enabled = SettingsManager.shared.lockScreenLyrics
+        if enabled, let lyrics = player?.lyrics, !lyrics.isEmpty {
+            info[MPMediaItemPropertyLyrics] =
+                lyrics.lines.map(\.text).joined(separator: "\n")
+        } else {
+            info[MPMediaItemPropertyLyrics] = nil
+        }
+        #if os(iOS)
+        if let track = metadataTrack {
+            var lyricLine: String? = nil
+            if enabled,
+               let lyrics = player?.lyrics, !lyrics.isEmpty,
+               let index = player?.lyricsCursor.activeIndex,
+               lyrics.lines.indices.contains(index) {
+                let text = lyrics.lines[index].text
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                lyricLine = text.isEmpty ? nil : text
+            }
+            if let lyricLine {
+                info[MPMediaItemPropertyTitle] = "\(track.name) — \(track.artistNames)"
+                info[MPMediaItemPropertyArtist] = lyricLine
+            } else {
+                info[MPMediaItemPropertyTitle] = track.name
+                info[MPMediaItemPropertyArtist] = track.artistNames
+            }
+        }
+        #endif
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 
     /// Reflects the current track's hearted state on the like command.
@@ -132,6 +193,7 @@ final class NowPlayingManager {
     }
 
     func updateMetadata(for track: Track, duration: TimeInterval) {
+        metadataTrack = track
         info = [
             MPMediaItemPropertyTitle: track.name,
             MPMediaItemPropertyArtist: track.artistNames,
@@ -146,6 +208,7 @@ final class NowPlayingManager {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
         MPNowPlayingInfoCenter.default().playbackState = .playing
         refreshLikeState()
+        refreshSystemLyrics()
 
         artworkTask?.cancel()
         // 1024px: the lock screen's tap-to-fullscreen artwork presentation
