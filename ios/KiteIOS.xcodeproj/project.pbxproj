@@ -12,6 +12,9 @@
 		C2D27A1CAB9C74AB85AE8166 /* KiteIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A494667EB444A90236506102 /* KiteIOSApp.swift */; };
 		C777A61B1DD211B6FF64D88B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B9C6A5A61A6330586810260 /* Assets.xcassets */; };
 		EC74DAC7ED94A1CFD01A6BB9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 07C790DFE6D836026CD01D00 /* PrivacyInfo.xcprivacy */; };
+		396A8272388E437EB0FDFED9 /* KiteLyricsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC25B2FD03C4780BF5FAA9B /* KiteLyricsWidget.swift */; };
+		263A5008D9FA49EDACA95457 /* LockScreenLyricsAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D77E7B30D74F98B2446F90 /* LockScreenLyricsAttributes.swift */; };
+		C055C51CE9C44CC195C1171B /* KiteLyricsWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 068ACE26AF054BC7B9D2C7B6 /* KiteLyricsWidget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -22,7 +25,28 @@
 			remoteGlobalIDString = 481C5C62EB4A6DB3CC0FDC39;
 			remoteInfo = KiteIOS;
 		};
+		D85BC08C3E904582B07FBAF3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1C3D3EF86B1B44C4A2366E3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 71C0E1F1275F4DEAB435EC7B;
+			remoteInfo = KiteLyricsWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		276753EC07574D5ABF2458A8 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C055C51CE9C44CC195C1171B /* KiteLyricsWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0646F456C7BF38C0A8ED880E /* KiteIOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KiteIOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -36,6 +60,10 @@
 		7A9033A23C5610F19ABA3774 /* KiteIOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiteIOSUITests.swift; sourceTree = "<group>"; };
 		8B9C6A5A61A6330586810260 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A494667EB444A90236506102 /* KiteIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiteIOSApp.swift; sourceTree = "<group>"; };
+		068ACE26AF054BC7B9D2C7B6 /* KiteLyricsWidget.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = KiteLyricsWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CC25B2FD03C4780BF5FAA9B /* KiteLyricsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiteLyricsWidget.swift; sourceTree = "<group>"; };
+		47B2F6F2CDDE472F945EE6A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E5D77E7B30D74F98B2446F90 /* LockScreenLyricsAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LockScreenLyricsAttributes.swift; path = ../Sources/Kite/Core/Player/LockScreenLyricsAttributes.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +72,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				912D4F61C71BE306BABD494B /* KiteIOSFeature in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9A7F930FCF114AEBAC3246AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +99,7 @@
 				4E1CC50B92220A5917A760E8 /* Config */,
 				07C790DFE6D836026CD01D00 /* PrivacyInfo.xcprivacy */,
 				9C2BFF3109E01BC79A4469A4 /* KiteIOS */,
+				4EFA434CDA52491FB0D8A408 /* KiteLyricsWidget */,
 				CEC97C7667B5C3BA415E1C82 /* KiteIOSUITests */,
 				06B27D73B868029A6CD07927 /* Packages */,
 				49A9A6B7173C5F9EDEB542C8 /* Products */,
@@ -74,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				25934AD73710C9EDB53BDDA0 /* KiteIOS.app */,
+				068ACE26AF054BC7B9D2C7B6 /* KiteLyricsWidget.appex */,
 				0646F456C7BF38C0A8ED880E /* KiteIOS.xctest */,
 			);
 			name = Products;
@@ -107,6 +144,16 @@
 			path = KiteIOSUITests;
 			sourceTree = "<group>";
 		};
+		4EFA434CDA52491FB0D8A408 /* KiteLyricsWidget */ = {
+			isa = PBXGroup;
+			children = (
+				47B2F6F2CDDE472F945EE6A7 /* Info.plist */,
+				5CC25B2FD03C4780BF5FAA9B /* KiteLyricsWidget.swift */,
+				E5D77E7B30D74F98B2446F90 /* LockScreenLyricsAttributes.swift */,
+			);
+			path = KiteLyricsWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -117,10 +164,12 @@
 				70D34C1C5A629E97B9F4827E /* Sources */,
 				7545061B2914675A51010029 /* Resources */,
 				B85E6AD333E049D6862A8DBF /* Frameworks */,
+				276753EC07574D5ABF2458A8 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				16472FFB40D849AD868B7E11 /* PBXTargetDependency */,
 			);
 			name = KiteIOS;
 			packageProductDependencies = (
@@ -148,6 +197,23 @@
 			productReference = 0646F456C7BF38C0A8ED880E /* KiteIOS.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		71C0E1F1275F4DEAB435EC7B /* KiteLyricsWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 65896F8F545B45B08343A439 /* Build configuration list for PBXNativeTarget "KiteLyricsWidget" */;
+			buildPhases = (
+				59FADAE2B42D471DA995DBFE /* Sources */,
+				9A7F930FCF114AEBAC3246AE /* Frameworks */,
+				D75CEB2E1E0948329197B9B6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KiteLyricsWidget;
+			productName = KiteLyricsWidget;
+			productReference = 068ACE26AF054BC7B9D2C7B6 /* KiteLyricsWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -162,6 +228,9 @@
 					};
 					7F3FA2EAD87A1580A6CD3880 = {
 						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					71C0E1F1275F4DEAB435EC7B = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -185,6 +254,7 @@
 			targets = (
 				481C5C62EB4A6DB3CC0FDC39 /* KiteIOS */,
 				7F3FA2EAD87A1580A6CD3880 /* KiteIOSUITests */,
+				71C0E1F1275F4DEAB435EC7B /* KiteLyricsWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -196,6 +266,13 @@
 			files = (
 				C777A61B1DD211B6FF64D88B /* Assets.xcassets in Resources */,
 				EC74DAC7ED94A1CFD01A6BB9 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D75CEB2E1E0948329197B9B6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,6 +295,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		59FADAE2B42D471DA995DBFE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				396A8272388E437EB0FDFED9 /* KiteLyricsWidget.swift in Sources */,
+				263A5008D9FA49EDACA95457 /* LockScreenLyricsAttributes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -225,6 +311,11 @@
 			isa = PBXTargetDependency;
 			target = 481C5C62EB4A6DB3CC0FDC39 /* KiteIOS */;
 			targetProxy = 938A878937A1366DA22272E1 /* PBXContainerItemProxy */;
+		};
+		16472FFB40D849AD868B7E11 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 71C0E1F1275F4DEAB435EC7B /* KiteLyricsWidget */;
+			targetProxy = D85BC08C3E904582B07FBAF3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -406,6 +497,50 @@
 			};
 			name = Release;
 		};
+		B1EDE425877841E88AD7D1AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KiteLyricsWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = sb.moe.kite.lyricswidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		218091380E8F47EEAE8182DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KiteLyricsWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = sb.moe.kite.lyricswidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -432,6 +567,15 @@
 			buildConfigurations = (
 				CEDC431136741B112A47F211 /* Debug */,
 				B397BC88E3CFDE6D275528E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		65896F8F545B45B08343A439 /* Build configuration list for PBXNativeTarget "KiteLyricsWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1EDE425877841E88AD7D1AC /* Debug */,
+				218091380E8F47EEAE8182DC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
