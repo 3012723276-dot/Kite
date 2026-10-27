@@ -7,6 +7,18 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## 0.1.61-Beta7 - 2026-10-27
+
+### Improved
+
+- **iOS + macOS**: the "Click Artwork to Open Album" toggle in Settings now sits directly under Language, and its switch is green when on, matching the other settings toggles.
+
+---
+
+### 改进
+
+- **iOS + macOS**：设置页「点击封面打开专辑」开关移到「语言」行下方，开关打开时为绿色，与其他设置开关保持一致。
+
 ## 0.1.61-Beta6 - 2026-10-27
 
 ### Added
