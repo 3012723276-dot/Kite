@@ -15,6 +15,18 @@ final class NowPlayingManager {
     /// lyric line can rewrite title / artist without a service round-trip.
     private var metadataTrack: Track?
 
+    // Lock-screen lyric line timing (iOS): the freshest position handed to
+    // updateElapsed, its wall-clock stamp and rate. Between position
+    // updates the current position is interpolated from these, so a line
+    // change is never computed from a position up to half a second old.
+    private var lastElapsedValue: TimeInterval = 0
+    private var lastElapsedStamp = Date()
+    private var lastRate: Double = 0
+    /// Signature of the last title/artist/lyrics combination pushed to
+    /// the system, so the refresh timer only writes on a real change.
+    private var lastPushedSignature = ""
+    private var lineTimer: Timer?
+
     private init() {}
 
     func attach(to player: PlayerService) {
@@ -138,6 +150,16 @@ final class NowPlayingManager {
         SettingsManager.shared.$lockScreenLyrics
             .sink { [weak self] _ in self?.refreshSystemLyrics() }
             .store(in: &playbackStateCancellables)
+
+        #if os(iOS)
+        // Re-derive the lock-screen lyric line five times a second from
+        // the interpolated position; the write itself is signature-gated,
+        // so this costs nothing while the line is unchanged.
+        lineTimer?.invalidate()
+        lineTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refreshSystemLyrics() }
+        }
+        #endif
     }
 
     /// Publishes (or withdraws) the lyrics in the now-playing info,
@@ -167,13 +189,18 @@ final class NowPlayingManager {
         if let track = metadataTrack {
             var lyricLine: String? = nil
             if enabled, let lyrics = player?.lyrics, !lyrics.isEmpty {
-                // Derive the line from the playback clock, the same source
-                // and lead-in the immersive lyrics view uses, so the lock
-                // screen cannot drift from what the app shows. The shared
+                // Derive the line from the playback position, the same
+                // source the immersive lyrics view uses, so the lock
+                // screen cannot drift from what the app shows. (The shared
                 // lyrics cursor is fed by the engine's raw timeline, which
                 // lags the heard position and does not recover cleanly
-                // after a seek.
-                let position = (player?.clock.progress ?? 0) + 0.2
+                // after a seek.) The position is interpolated between the
+                // service's position updates and given a slightly larger
+                // lead than the in-app view's 0.2, to absorb the time the
+                // system needs to render the change on the lock screen.
+                let interpolated = lastElapsedValue
+                    + (lastRate > 0 ? Date().timeIntervalSince(lastElapsedStamp) * lastRate : 0)
+                let position = max(interpolated, player?.clock.progress ?? 0) + 0.35
                 let index = lyrics.activeIndex(at: position)
                     ?? player?.lyricsCursor.activeIndex
                 if let index, lyrics.lines.indices.contains(index) {
@@ -192,7 +219,15 @@ final class NowPlayingManager {
         }
         #endif
         if push {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+            let signature = [
+                info[MPMediaItemPropertyTitle] as? String ?? "",
+                info[MPMediaItemPropertyArtist] as? String ?? "",
+                info[MPMediaItemPropertyLyrics] != nil ? "L" : "",
+            ].joined(separator: "|")
+            if signature != lastPushedSignature {
+                lastPushedSignature = signature
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+            }
         }
     }
 
@@ -208,6 +243,10 @@ final class NowPlayingManager {
 
     func updateMetadata(for track: Track, duration: TimeInterval) {
         metadataTrack = track
+        lastElapsedValue = 0
+        lastElapsedStamp = Date()
+        lastRate = 0
+        lastPushedSignature = ""
         info = [
             MPMediaItemPropertyTitle: track.name,
             MPMediaItemPropertyArtist: track.artistNames,
@@ -242,6 +281,9 @@ final class NowPlayingManager {
     }
 
     func updateElapsed(_ elapsed: TimeInterval, rate: Double) {
+        lastElapsedValue = elapsed
+        lastElapsedStamp = Date()
+        lastRate = rate
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
         info[MPNowPlayingInfoPropertyPlaybackRate] = rate
         #if os(iOS)
@@ -260,6 +302,9 @@ final class NowPlayingManager {
         artworkTask?.cancel()
         artworkTask = nil
         info = [:]
+        metadataTrack = nil
+        lastPushedSignature = ""
+        lastRate = 0
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         MPNowPlayingInfoCenter.default().playbackState = .stopped
         MPRemoteCommandCenter.shared().likeCommand.isActive = false
