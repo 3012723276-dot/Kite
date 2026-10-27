@@ -129,6 +129,7 @@ final class SettingsManager: ObservableObject {
         static let quality = "settings.audioQuality"
         static let appearance = "settings.appearance"
         static let nowPlayingMode = "settings.nowPlayingMode"
+        static let openAlbumOnArtworkClick = "settings.openAlbumOnArtworkClick"
         static let showTranslation = "settings.showLyricsTranslation"
         static let showRomaji = "settings.showLyricsRomaji"  // migrated to `annotation`
         static let annotation = "settings.lyricsAnnotation"
@@ -229,6 +230,10 @@ final class SettingsManager: ObservableObject {
         didSet { UserDefaults.standard.set(nowPlayingMode.rawValue, forKey: Keys.nowPlayingMode) }
     }
 
+    @Published var openAlbumOnArtworkClick: Bool {
+        didSet { UserDefaults.standard.set(openAlbumOnArtworkClick, forKey: Keys.openAlbumOnArtworkClick) }
+    }
+
     @Published var showLyricsTranslation: Bool {
         didSet { UserDefaults.standard.set(showLyricsTranslation, forKey: Keys.showTranslation) }
     }
@@ -250,8 +255,9 @@ final class SettingsManager: ObservableObject {
         didSet { UserDefaults.standard.set(lyricsAnnotation.rawValue, forKey: Keys.annotation) }
     }
 
-    /// Karaoke-style word-by-word highlighting when the song has verbatim
-    /// (yrc) lyrics; falls back to line highlighting when it doesn't.
+    /// Karaoke-style word-by-word highlighting: NetEase's own timing when the
+    /// song has verbatim (yrc) lyrics, else the line's time spread across its
+    /// characters.
     @Published var verbatimLyrics: Bool {
         didSet { UserDefaults.standard.set(verbatimLyrics, forKey: Keys.verbatimLyrics) }
     }
@@ -390,6 +396,7 @@ final class SettingsManager: ObservableObject {
         appLanguage = defaults.string(forKey: Keys.language).flatMap(AppLanguage.init)
         AppLanguageBundle.install()
         nowPlayingMode = defaults.string(forKey: Keys.nowPlayingMode).flatMap(NowPlayingMode.init) ?? .immersive
+        openAlbumOnArtworkClick = defaults.object(forKey: Keys.openAlbumOnArtworkClick) as? Bool ?? true
         showLyricsTranslation = defaults.object(forKey: Keys.showTranslation) as? Bool ?? true
         // Carry over the old on/off romaji toggle for anyone who had it on.
         lyricsAnnotation = defaults.string(forKey: Keys.annotation).flatMap(LyricsAnnotation.init)
