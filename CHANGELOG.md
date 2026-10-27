@@ -7,6 +7,32 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## 0.1.61-Beta6 - 2026-10-27
+
+### Added
+
+- **iOS + macOS**: a setting to stop the now-playing artwork from opening the album when clicked — Settings → 点击封面打开专辑, on by default. Synced from upstream Kumone 0.3.22 (#144).
+- **iOS + macOS**: word-by-word lyrics now run for every song — when NetEase has no verbatim timing for a track, the line's time is spread across its characters, so the karaoke wipe no longer falls back to plain line highlighting. Punctuation and spaces light up with the character before them instead of taking singing time of their own. Synced from upstream Kumone 0.3.22.
+
+### Fixed
+
+- **macOS**: the collapse chevron on the immersive now-playing page is clickable again — the hidden toolbar's sidebar-toggle slot was swallowing the click, so the page only answered to Escape. Synced from upstream Kumone 0.3.22.
+- **iOS + macOS**: translations and romaji line up with verbatim lyrics that start a few hundred milliseconds off the plain lyric grid, and a song that ships verbatim lyrics without a plain body shows its lyrics instead of none. Synced from upstream Kumone 0.3.22.
+- **iOS + macOS**: the English settings page no longer shows untranslated labels for the now-playing mode, ambient colour, desktop lyrics and update options. Synced from upstream Kumone 0.3.22 (#145).
+
+---
+
+### 新增
+
+- **iOS + macOS**：新增「点击封面打开专辑」开关（设置 → 外观），默认开启；关闭后播放页点击封面不再跳转到专辑。同步自上游 Kumone 0.3.22（#144）。
+- **iOS + macOS**：逐字歌词覆盖所有歌曲——网易云没有提供逐字时间轴的歌曲，把每行时长按字分摊，卡拉OK 式逐字点亮不再退回整行高亮；标点和空格不再占用演唱时间，跟随前一个字点亮。同步自上游 Kumone 0.3.22。
+
+### 修复
+
+- **macOS**：沉浸式播放页左上角的收起按钮恢复可点击——此前被隐藏工具栏中侧边栏开关的占位区域挡住，只能按 Esc 关闭。同步自上游 Kumone 0.3.22。
+- **iOS + macOS**：逐字歌词与普通歌词时间轴相差几百毫秒时，翻译和罗马音不再丢失；只有逐字歌词、没有普通歌词的歌曲也能正常显示歌词。同步自上游 Kumone 0.3.22。
+- **iOS + macOS**：英文界面的设置页补齐了播放页模式、环境色、桌面歌词、更新等选项的翻译。同步自上游 Kumone 0.3.22（#145）。
+
 ## 0.1.61 - 2026-10-26
 
 ### **Added**
