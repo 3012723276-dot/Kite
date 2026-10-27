@@ -119,6 +119,34 @@ final class NowPlayingManager {
                 }
             }
             .store(in: &playbackStateCancellables)
+
+        // Lock-screen lyrics (0.1.7): hand the parsed lyrics to the system
+        // player through the standard lyrics metadata key, so they appear
+        // in the system player's lyrics page (the expanded player on the
+        // lock screen and in Control Center). Lyrics load after the track
+        // metadata is set, hence a subscription rather than doing this in
+        // updateMetadata alone.
+        player.$lyrics
+            .sink { [weak self] _ in self?.refreshSystemLyrics() }
+            .store(in: &playbackStateCancellables)
+        SettingsManager.shared.$lockScreenLyrics
+            .sink { [weak self] _ in self?.refreshSystemLyrics() }
+            .store(in: &playbackStateCancellables)
+    }
+
+    /// Publishes (or withdraws) the lyrics in the now-playing info,
+    /// according to the 锁屏歌词 setting. Also called at the end of
+    /// updateMetadata, which rebuilds `info` from scratch.
+    func refreshSystemLyrics() {
+        guard !info.isEmpty else { return }
+        if SettingsManager.shared.lockScreenLyrics,
+           let lyrics = player?.lyrics, !lyrics.isEmpty {
+            info[MPMediaItemPropertyLyrics] =
+                lyrics.lines.map(\.text).joined(separator: "\n")
+        } else {
+            info[MPMediaItemPropertyLyrics] = nil
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 
     /// Reflects the current track's hearted state on the like command.
@@ -146,6 +174,7 @@ final class NowPlayingManager {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
         MPNowPlayingInfoCenter.default().playbackState = .playing
         refreshLikeState()
+        refreshSystemLyrics()
 
         artworkTask?.cancel()
         // 1024px: the lock screen's tap-to-fullscreen artwork presentation
