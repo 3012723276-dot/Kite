@@ -18,6 +18,10 @@
     <array>
         <string>audio</string>
     </array>
+    <!-- Lock-screen lyrics (Live Activity, 0.1.7): without this key iOS
+         refuses to display the KiteLyricsWidget activity on the Lock Screen. -->
+    <key>NSSupportsLiveActivities</key>
+    <true/>
     <!-- Expose the app's Documents folder in the Files app (On My iPhone ▸
          Kite) so a downloaded update IPA is findable and can be imported into
          a signing tool. (#73, #50) -->
