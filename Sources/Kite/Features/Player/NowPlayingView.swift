@@ -696,7 +696,8 @@ struct NowPlayingView: View {
 
     private func artworkView(size: CGFloat) -> some View {
         Group {
-            if let album = player.currentTrack?.album, album.id > 0, !album.name.isEmpty {
+            if settings.openAlbumOnArtworkClick,
+               let album = player.currentTrack?.album, album.id > 0, !album.name.isEmpty {
                 Button {
                     onOpenDestination(.album(album.id))
                 } label: {
@@ -1073,22 +1074,31 @@ struct LyricMainText: View {
     }
 
     /// One opacity per character of `line.text`: sung characters are bright,
-    /// the current one fades in, unsung stay dim.
+    /// the current one fades in, unsung stay dim. A word's time is shared by
+    /// its letters; punctuation and spaces take none and light up with the
+    /// character before them (or the first one, when they open the line).
     static func alphas(for line: LyricLine, words: [LyricWord], at time: TimeInterval) -> [Double] {
         let unsung = 0.28
         var out: [Double] = []
         for word in words {
             let chars = Array(word.text)
-            let per = chars.isEmpty ? word.duration : word.duration / Double(chars.count)
+            guard !chars.isEmpty else { continue }
+            let letters = chars.indices.filter { chars[$0].isLetter || chars[$0].isNumber }
+            let slots = letters.isEmpty ? Array(chars.indices) : letters
+            // A token NetEase timed at nothing still ramps, over 50 ms.
+            let per = max(word.duration, 0.05) / Double(slots.count)
+            var lit: [Int: Double] = [:]
+            for (slot, index) in slots.enumerated() {
+                let frac = min(max((time - (word.start + per * Double(slot))) / per, 0), 1)
+                lit[index] = unsung + (1 - unsung) * frac
+            }
+            let opening = lit[slots[0]] ?? unsung
             for index in chars.indices {
-                let charStart = word.start + per * Double(index)
-                let frac = per > 0 ? min(max((time - charStart) / per, 0), 1)
-                                   : (time >= charStart ? 1 : 0)
-                out.append(unsung + (1 - unsung) * frac)
+                out.append(lit[index] ?? out.last ?? opening)
             }
         }
-        // `line.text` is the words joined and *then* trimmed, so drop the
-        // opacities for whitespace the line no longer starts with.
+        // The words' text joined is the line's text; should they ever differ,
+        // keep one opacity per character of the line.
         let joined = words.map(\.text).joined()
         guard joined.count != line.text.count else { return out }
         let leading = joined.count - joined.drop(while: \.isWhitespace).count
