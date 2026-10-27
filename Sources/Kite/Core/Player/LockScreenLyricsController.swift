@@ -66,14 +66,15 @@ final class LockScreenLyricsController {
 
         if let activity, activityTrackID == track.id {
             // Same song: push the new line / play state into the live card.
-            let stale = staleDate(for: player)
-            Task { await activity.update(ActivityContent(state: state, staleDate: stale)) }
+            // (The contentState-based spelling is the iOS 16.1 form; the
+            // ActivityContent wrapper API only exists from 16.2.)
+            Task { await activity.update(using: state) }
         } else {
             endActivity()
             do {
                 activity = try Activity.request(
                     attributes: LockScreenLyricsAttributes(startedAt: Date()),
-                    content: ActivityContent(state: state, staleDate: staleDate(for: player)),
+                    contentState: state,
                     pushType: nil
                 )
                 activityTrackID = track.id
@@ -103,27 +104,11 @@ final class LockScreenLyricsController {
         )
     }
 
-    /// The card goes stale when the current line ends, so the system can
-    /// dim it if the app is suspended and the next update never arrives.
-    private func staleDate(for player: PlayerService) -> Date? {
-        guard player.isPlaying,
-              let lyrics = player.lyrics,
-              let index = player.lyricsCursor.activeIndex,
-              lyrics.lines.indices.contains(index)
-        else { return nil }
-        let lineEnd = lyrics.lines.indices.contains(index + 1)
-            ? lyrics.lines[index + 1].start
-            : player.duration
-        let remaining = lineEnd - player.clock.progress
-        guard remaining > 0 else { return nil }
-        return Date().addingTimeInterval(remaining)
-    }
-
     private func endActivity() {
         guard let activity else { return }
         self.activity = nil
         activityTrackID = nil
-        Task { await activity.end(nil, dismissalPolicy: .immediate) }
+        Task { await activity.end(using: nil, dismissalPolicy: .immediate) }
     }
 }
 #endif
