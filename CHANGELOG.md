@@ -7,6 +7,18 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## iOS 0.1.7-Beta1 - 2026-10-27
+
+### Added
+
+- **iOS**: lock-screen lyrics — while a song plays, a Live Activity on the Lock Screen (and Dynamic Island) shows the line being sung and the next line, updated line by line as the song plays. Toggle in Settings → Lock Screen Lyrics, on by default; requires Live Activities to be allowed for Kite in iOS Settings.
+
+---
+
+### 新增
+
+- **iOS**：锁屏歌词——播放时锁屏（及灵动岛）会以实时活动显示正在唱的这一句歌词和下一句，随播放逐行更新。开关在设置 → 锁屏歌词，默认开启；需要在 iOS 系统设置中允许 Kite 使用实时活动。
+
 ## iOS 0.1.62 - 2026-10-27
 
 ### Added
