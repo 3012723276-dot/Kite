@@ -133,6 +133,7 @@ final class SettingsManager: ObservableObject {
         static let appearance = "settings.appearance"
         static let nowPlayingMode = "settings.nowPlayingMode"
         static let openAlbumOnArtworkClick = "settings.openAlbumOnArtworkClick"
+        static let lockScreenLyrics = "settings.lockScreenLyrics"
         static let showTranslation = "settings.showLyricsTranslation"
         static let showRomaji = "settings.showLyricsRomaji"  // migrated to `annotation`
         static let annotation = "settings.lyricsAnnotation"
@@ -235,6 +236,12 @@ final class SettingsManager: ObservableObject {
 
     @Published var openAlbumOnArtworkClick: Bool {
         didSet { UserDefaults.standard.set(openAlbumOnArtworkClick, forKey: Keys.openAlbumOnArtworkClick) }
+    }
+
+    /// iOS lock-screen lyrics Live Activity (0.1.7). Stored on both
+    /// platforms; only read on iOS, where the settings row lives.
+    @Published var lockScreenLyrics: Bool {
+        didSet { UserDefaults.standard.set(lockScreenLyrics, forKey: Keys.lockScreenLyrics) }
     }
 
     @Published var showLyricsTranslation: Bool {
@@ -400,6 +407,7 @@ final class SettingsManager: ObservableObject {
         AppLanguageBundle.install()
         nowPlayingMode = defaults.string(forKey: Keys.nowPlayingMode).flatMap(NowPlayingMode.init) ?? .immersive
         openAlbumOnArtworkClick = defaults.object(forKey: Keys.openAlbumOnArtworkClick) as? Bool ?? true
+        lockScreenLyrics = defaults.object(forKey: Keys.lockScreenLyrics) as? Bool ?? true
         showLyricsTranslation = defaults.object(forKey: Keys.showTranslation) as? Bool ?? true
         // Carry over the old on/off romaji toggle for anyone who had it on.
         lyricsAnnotation = defaults.string(forKey: Keys.annotation).flatMap(LyricsAnnotation.init)

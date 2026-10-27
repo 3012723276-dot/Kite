@@ -16,6 +16,11 @@ final class NowPlayingManager {
 
     func attach(to player: PlayerService) {
         self.player = player
+        #if os(iOS)
+        if #available(iOS 16.1, *) {
+            LockScreenLyricsController.shared.attach(to: player)
+        }
+        #endif
         playbackStateCancellables.removeAll()
         let center = MPRemoteCommandCenter.shared()
 

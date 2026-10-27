@@ -145,6 +145,10 @@ struct SettingsView: View {
                 .tint(.secondary)
                 Toggle("点击封面打开专辑", isOn: $settings.openAlbumOnArtworkClick)
                     .tint(.green)
+                #if os(iOS)
+                Toggle("锁屏歌词", isOn: $settings.lockScreenLyrics)
+                    .tint(.green)
+                #endif
                 Toggle("显示歌词翻译", isOn: $settings.showLyricsTranslation)
                     .tint(.green)
                 Toggle("逐字歌词（卡拉OK）", isOn: $settings.verbatimLyrics)
