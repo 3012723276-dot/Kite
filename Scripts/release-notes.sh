@@ -11,7 +11,7 @@ VERSION="${1:?usage: release-notes.sh <version> [--html]}"
 FORMAT="${2:-md}"
 
 SECTION="$(awk -v ver="$VERSION" '
-  /^## / { on = ($2 == ver); next }
+  /^## / { on = ($2 == ver) || ($2 == "iOS" && $3 == ver); next }
   on { print }
 ' "$ROOT/CHANGELOG.md")"
 
@@ -19,7 +19,7 @@ SECTION="$(awk -v ver="$VERSION" '
 SECTION="$(printf '%s\n' "$SECTION" | awk 'NF {found=1} found' | awk '{lines[NR]=$0} END {last=NR; while (last>0 && lines[last] !~ /[^[:space:]]/) last--; for (i=1;i<=last;i++) print lines[i]}')"
 
 if [ -z "$SECTION" ]; then
-  echo "ERROR: CHANGELOG.md has no section for version $VERSION (expected '## $VERSION - <date>')" >&2
+  echo "ERROR: CHANGELOG.md has no section for version $VERSION (expected '## iOS $VERSION - <date>' or '## $VERSION - <date>')" >&2
   exit 1
 fi
 
