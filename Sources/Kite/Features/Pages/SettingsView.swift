@@ -127,6 +127,7 @@ struct SettingsView: View {
                 }
                 .tint(.secondary)
                 #endif
+                Toggle("点击封面打开专辑", isOn: $settings.openAlbumOnArtworkClick)
                 // Language row (beta2): sits between the player-page mode
                 // picker and the lyrics-translation toggle. The trailing
                 // value is the current language, shown in its own script;
