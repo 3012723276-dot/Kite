@@ -39,7 +39,7 @@ jobs:
           # Use the CHANGELOG section when it exists; otherwise fall back to
           # a short note so the release (and altstore.json, which requires
           # non-empty notes) never fails just because CHANGELOG wasn't updated.
-          if Scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md" 2>/dev/null; then
+          if bash Scripts/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md" 2>/dev/null; then
             echo "Using CHANGELOG section for $VERSION"
           else
             printf 'Kite iOS %s\n\nUnsigned IPA for iOS 16+. Install with AltStore, SideStore, Sideloadly or Xcode using your own Apple ID.\n' "$VERSION" > "$RUNNER_TEMP/notes.md"
@@ -84,6 +84,7 @@ jobs:
         run: |
           gh release create "v$VERSION" \
             --title "Kite iOS $VERSION" \
+            --target "${{ github.sha }}" \
             --notes-file "$RUNNER_TEMP/notes.md" \
             "dist/Kite-iOS-$VERSION.ipa" \
             dist/altstore.json \
