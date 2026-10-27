@@ -7,6 +7,18 @@
 `---` 分隔，随后是完整的**中文**部分（`### 新增` / `### 修复` / `### 改进`）。英文块与中文块
 的条目一一对应、顺序一致。（0.3.19 起采用此双语分块格式；更早的版本沿用旧的中英交替格式。）
 
+## iOS 0.1.7-Beta4 - 2026-10-28
+
+### Fixed
+
+- Lock Screen Lyrics now stay in sync with the lyrics shown in the app: the line is derived from the playback position (the same source the in-app lyrics use) and refreshed on every position update, fixing a constant lag and the wrong line shown after scrubbing the progress bar.
+
+---
+
+### 修复
+
+- 锁屏歌词现在与应用内歌词保持同步：歌词行改为按播放位置计算（与应用内歌词同一数据源），并在每次位置更新时刷新，修复了固有延迟以及拖动进度条后歌词对不上的问题。
+
 ## iOS 0.1.7-Beta3 - 2026-10-28
 
 ### Added

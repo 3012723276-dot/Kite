@@ -151,6 +151,10 @@ final class NowPlayingManager {
     /// updated as the cursor moves. Songs without lyrics keep the standard
     /// title / artist display.
     func refreshSystemLyrics() {
+        refreshSystemLyrics(push: true)
+    }
+
+    private func refreshSystemLyrics(push: Bool) {
         guard !info.isEmpty else { return }
         let enabled = SettingsManager.shared.lockScreenLyrics
         if enabled, let lyrics = player?.lyrics, !lyrics.isEmpty {
@@ -162,13 +166,21 @@ final class NowPlayingManager {
         #if os(iOS)
         if let track = metadataTrack {
             var lyricLine: String? = nil
-            if enabled,
-               let lyrics = player?.lyrics, !lyrics.isEmpty,
-               let index = player?.lyricsCursor.activeIndex,
-               lyrics.lines.indices.contains(index) {
-                let text = lyrics.lines[index].text
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                lyricLine = text.isEmpty ? nil : text
+            if enabled, let lyrics = player?.lyrics, !lyrics.isEmpty {
+                // Derive the line from the playback clock, the same source
+                // and lead-in the immersive lyrics view uses, so the lock
+                // screen cannot drift from what the app shows. The shared
+                // lyrics cursor is fed by the engine's raw timeline, which
+                // lags the heard position and does not recover cleanly
+                // after a seek.
+                let position = (player?.clock.progress ?? 0) + 0.2
+                let index = lyrics.activeIndex(at: position)
+                    ?? player?.lyricsCursor.activeIndex
+                if let index, lyrics.lines.indices.contains(index) {
+                    let text = lyrics.lines[index].text
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    lyricLine = text.isEmpty ? nil : text
+                }
             }
             if let lyricLine {
                 info[MPMediaItemPropertyTitle] = "\(track.name) — \(track.artistNames)"
@@ -179,7 +191,9 @@ final class NowPlayingManager {
             }
         }
         #endif
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+        if push {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+        }
     }
 
     /// Reflects the current track's hearted state on the like command.
@@ -230,6 +244,14 @@ final class NowPlayingManager {
     func updateElapsed(_ elapsed: TimeInterval, rate: Double) {
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
         info[MPNowPlayingInfoPropertyPlaybackRate] = rate
+        #if os(iOS)
+        // Re-derive the lock-screen lyric line on every position update
+        // (about twice a second while playing, and on every seek), so it
+        // stays glued to the app's lyrics even if a cursor event was
+        // missed. The write below publishes it together with the new
+        // elapsed time.
+        refreshSystemLyrics(push: false)
+        #endif
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
         MPNowPlayingInfoCenter.default().playbackState = rate > 0 ? .playing : .paused
     }
